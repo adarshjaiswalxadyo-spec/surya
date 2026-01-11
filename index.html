@@ -1,0 +1,956 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Surya Editor — Live Videos</title>
+  <meta name="description" content="Surya Editor — professional animated portfolio with live video previews" />
+  <meta name="theme-color" content="#071226">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /*
+      Advanced / "hard level" visual upgrade:
+      - Animated gradient background (moving)
+      - Canvas particle system (interactive)
+      - Parallax on mouse move
+      - Polished hero with animated two-word phrases
+      - Smooth reveal on scroll (IntersectionObserver)
+      - Card tilt + depth shadows
+      - Animated thumbnails + play pulse
+      - Modal contact form with animation
+      - Accessible keyboard interactions
+      - Mobile-friendly improvements added (responsive nav, reduced particles on small screens, touch-friendly controls)
+      - Client feedback area compacted as requested
+    */
+
+    :root{
+      --bg1:#031022; --bg2:#071226;
+      --card:#0e1a27;
+      --accent1:#ffb86b; --accent2:#ff7b7b;
+      --muted:#93a8bf; --text:#eaf4ff;
+      --glass: rgba(255,255,255,0.03);
+      --radius:14px;
+      --container:1140px;
+      --shadow: 0 20px 50px rgba(2,8,20,0.6);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
+      color:var(--text); -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+      background: radial-gradient(600px 300px at 10% 15%, rgba(255,120,120,0.03), transparent 12%),
+                  radial-gradient(500px 300px at 90% 80%, rgba(110,200,255,0.02), transparent 12%),
+                  linear-gradient(180deg,var(--bg1),var(--bg2));
+      overflow-x:hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* animated gradient ribbon behind header */
+    #bg-ribbon {
+      position:fixed; inset: -20% -30% auto -30%; height:60vh; pointer-events:none; z-index:0;
+      background: linear-gradient(90deg, rgba(255,120,120,0.06), rgba(110,200,255,0.04), rgba(255,120,120,0.02));
+      filter: blur(48px); transform: translateY(-8%); transition:transform .6s ease; mix-blend-mode:screen;
+      animation: ribbonMove 12s linear infinite;
+    }
+    @keyframes ribbonMove { 0%{transform: translateX(0) translateY(-4%)} 50%{transform: translateX(6%) translateY(-8%)} 100%{transform: translateX(0) translateY(-4%)} }
+
+    .container{max-width:var(--container);margin:0 auto;padding:28px;position:relative;z-index:4}
+
+    header{
+      position:sticky; top:0; z-index:60; padding:12px 0; backdrop-filter: blur(6px);
+      background: linear-gradient(180deg, rgba(2,8,15,0.44), rgba(2,8,15,0.08)); border-bottom:1px solid rgba(255,255,255,0.02);
+    }
+    .header-inner{display:flex;align-items:center;justify-content:space-between;gap:16px}
+    .brand h1{margin:0;font-size:20px} .brand p{margin:2px 0 0;color:var(--muted);font-size:13px}
+    nav a{color:var(--muted);text-decoration:none;margin-left:16px;font-weight:700;padding:6px 8px;border-radius:8px}
+    nav a:hover, nav a:focus{color:var(--text);background:rgba(255,255,255,0.02);outline:none;transform:translateY(-2px)}
+
+    /* mobile nav toggle (hidden by default on desktop) */
+    .mobile-nav-toggle{display:none;background:transparent;border:0;color:var(--muted);font-weight:800;padding:10px;border-radius:8px;cursor:pointer}
+    .mobile-nav-toggle:focus{outline:3px solid rgba(255,255,255,0.06);outline-offset:3px}
+
+    /* HERO */
+    .hero{padding:56px 0 40px;position:relative;overflow:visible;min-height:360px;display:flex;align-items:center}
+    .hero-inner{display:grid;grid-template-columns:1fr 420px;gap:28px;align-items:center;position:relative;z-index:5}
+
+    .hero-left{max-width:720px}
+    .hero-title{
+      margin:0 0 12px;font-weight:900;font-size:48px;line-height:1.03;color:transparent;
+      background:linear-gradient(90deg,var(--accent1),var(--accent2)); -webkit-background-clip:text;background-clip:text;
+      letter-spacing:-0.6px;
+    }
+
+    /* two-word animated phrases container */
+    .type-wrap {
+      display:inline-flex; align-items:center; gap:12px; vertical-align:middle;
+    }
+    .typed {
+      font-weight:900;font-size:48px;color:transparent;background:linear-gradient(90deg,var(--accent1),var(--accent2));
+      -webkit-background-clip:text;background-clip:text;
+      white-space:nowrap;
+    }
+    .typed-caret{
+      width:3px;height:1.02em;background:linear-gradient(180deg,#fff,#fff);border-radius:2px;
+      animation:blink .9s steps(2,start) infinite; box-shadow:0 0 12px rgba(255,140,120,0.6);
+    }
+    @keyframes blink {50%{opacity:0}}
+
+    .hero-sub{color:var(--muted);font-size:15px;margin-top:10px;max-width:62ch}
+
+    /* CTA */
+    .cta-row{display:flex;gap:12px;align-items:center;margin-top:18px;flex-wrap:wrap}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;text-decoration:none;color:var(--text);background:var(--glass);border:1px solid rgba(255,255,255,0.03);font-weight:800;cursor:pointer;transition:transform .16s ease, box-shadow .16s ease}
+    .btn:hover{transform:translateY(-6px);box-shadow:var(--shadow)}
+    .btn.primary{background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#071226}
+
+    .badge{display:inline-block;padding:6px 10px;border-radius:999px;background:linear-gradient(90deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));font-weight:800;color:var(--accent1);border:1px solid rgba(255,255,255,0.02)}
+
+    /* HERO RIGHT: profile card with parallax */
+    .avatar-card {
+      width:420px; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      padding:18px;border-radius:16px;border:1px solid rgba(255,255,255,0.03);display:flex;gap:12px;align-items:center;box-shadow:0 12px 40px rgba(2,8,20,0.45);
+      transform-style:preserve-3d; transition:transform .22s cubic-bezier(.2,.9,.2,1);
+      will-change:transform;
+    }
+    .avatar-card:hover{transform:translateY(-8px) rotateX(2deg) rotateY(-3deg)}
+    .avatar-wrap{position:relative;width:120px;height:120px;flex:0 0 120px}
+    .avatar{width:120px;height:120px;border-radius:999px;display:block;object-fit:cover;border:4px solid rgba(255,255,255,0.04);box-shadow:0 18px 40px rgba(2,8,20,0.55);transition:transform .28s}
+    .avatar:hover{transform:scale(1.04)}
+    .ring{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:152px;height:152px;border-radius:999px;background:conic-gradient(from 0deg, rgba(255,184,107,0.08), rgba(255,123,123,0.06));filter:blur(10px);opacity:0.95;animation:spin 10s linear infinite}
+    @keyframes spin{from{transform:translate(-50%,-50%) rotate(0deg)} to{transform:translate(-50%,-50%) rotate(360deg)}}
+    .meta-name{font-weight:800;font-size:18px;margin:0}
+    .meta-role{color:var(--muted);margin:6px 0 12px}
+
+    /* CARDS AND VIDEO GRID */
+    section{padding:40px 0}
+    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px}
+    .card{background:var(--card);padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.02);transition:transform .22s ease, box-shadow .22s ease;transform-origin:center}
+    .card:hover{transform:translateY(-10px);box-shadow:var(--shadow)}
+
+    .video-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+    .video-card{background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.02);transition:transform .18s ease, box-shadow .18s ease;will-change:transform}
+    .video-card:hover{transform:translateY(-10px);box-shadow:0 20px 50px rgba(2,8,20,0.55)}
+
+    .video-frame{width:100%;aspect-ratio:16/9;background:#000;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;position:relative}
+    .video-frame iframe, .video-frame video, .video-frame img{width:100%;height:100%;object-fit:cover;display:block}
+    .video-thumb{width:100%;height:100%;object-fit:cover;display:block;cursor:pointer;transition:transform .4s ease}
+    .video-card:hover .video-thumb{transform:scale(1.03)}
+    .play-badge{position:absolute;z-index:6;background:linear-gradient(90deg,var(--accent1),var(--accent2));width:60px;height:60px;border-radius:999px;display:flex;align-items:center;justify-content:center;color:#071226;font-weight:900;box-shadow:0 14px 40px rgba(2,8,20,0.5);cursor:pointer;pointer-events:auto;animation:playPulse 2000ms infinite}
+    @keyframes playPulse{0%{transform:scale(1)}50%{transform:scale(1.06)}100%{transform:scale(1)}}
+    .video-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+
+    .controls{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap}
+    .toggle{display:inline-flex;align-items:center;gap:8px}
+    .switch{width:46px;height:26px;border-radius:999px;background:#0b1220;border:1px solid rgba(255,255,255,0.04);position:relative;cursor:pointer}
+    .knob{position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;transition:left .18s ease, background .18s ease}
+    .switch.on{background:linear-gradient(90deg,var(--accent1),var(--accent2))}
+    .switch.on .knob{left:23px;background:#071226}
+
+    /* testimonials stacked cards with animation (compacted) */
+    .testimonial{display:flex;gap:10px;align-items:flex-start;padding:10px;border-radius:8px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);border:1px solid rgba(255,255,255,0.02);margin-bottom:10px;transform:translateY(8px);opacity:0;transition:all .5s cubic-bezier(.2,.9,.2,1)}
+    .testimonial.in-view{transform:none;opacity:1}
+
+    /* compacted text/avatar sizes */
+    .t-quote{font-size:13px;color:var(--muted);line-height:1.4}
+    .t-avatar{width:44px;height:44px;border-radius:999px;object-fit:cover;border:2px solid rgba(255,255,255,0.03)}
+    .t-name{font-weight:800;font-size:13px}
+    .t-role{font-size:12px;color:var(--muted)}
+
+    /* reduce overall testimonial wrapper width (aside column) */
+    .testimonial-wrap { margin-top:12px; display:grid; grid-template-columns: 1fr 260px; gap:12px; align-items:start; }
+
+    /* smaller card in the aside */
+    .testimonial-wrap aside > div { padding:12px; border-radius:10px; }
+
+    /* modal contact */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(2,8,15,0.6);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:120}
+    .modal{width:min(640px,94%);background:linear-gradient(180deg,#061022,#071226);border-radius:12px;padding:18px;border:1px solid rgba(255,255,255,0.04);box-shadow:0 30px 80px rgba(2,8,20,0.7);transform:translateY(20px) scale(.98);transition:all .28s ease}
+    .modal.show{transform:none}
+    .modal h4{margin:0 0 8px}
+    .form-row{display:flex;gap:8px;flex-wrap:wrap}
+    .input, textarea{width:100%;padding:10px;border-radius:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);color:var(--text);resize:vertical}
+    .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+
+    footer{border-top:1px solid rgba(255,255,255,0.02);padding:20px 0;color:var(--muted)}
+    .back-to-top{position:fixed;right:18px;bottom:18px;background:linear-gradient(90deg,var(--accent1),var(--accent2));width:46px;height:46px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#071226;cursor:pointer;box-shadow:0 12px 40px rgba(2,8,20,0.5);z-index:80}
+    .focus-ring:focus{outline:3px solid rgba(255,255,255,0.06);outline-offset:3px}
+
+    /* Responsive / mobile-friendly adjustments */
+    @media (max-width:980px){
+      .hero-inner{grid-template-columns:1fr}
+      .avatar-card{width:100%}
+      .hero-title{font-size:34px}
+      .typed{font-size:34px}
+      .video-grid{grid-template-columns:1fr}
+      .testimonial-wrap { grid-template-columns: 1fr; }
+      .testimonial { flex-direction:row; }
+    }
+
+    /* more compact mobile tweaks */
+    @media (max-width:700px){
+      .container{padding:18px}
+      .hero{padding:36px 0 24px}
+      .hero-title{font-size:28px}
+      .typed{font-size:28px}
+      .brand h1{font-size:18px}
+      .brand p{font-size:12px}
+      .cta-row .btn{padding:10px 12px;font-size:14px}
+      .btn{padding:10px 12px}
+      .play-badge{width:52px;height:52px;font-size:18px}
+      .mobile-nav-toggle{display:inline-flex}
+      nav{display:none} /* hidden by default on smaller screens, toggled with JS */
+      nav.open{
+        display:flex; flex-direction:column; gap:8px;
+        position:fixed; right:12px; top:66px; background:linear-gradient(180deg, rgba(2,8,15,0.96), rgba(2,8,15,0.98)); padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.03); z-index:90;
+        box-shadow:0 10px 40px rgba(2,8,20,0.6);
+      }
+      .header-inner{position:relative}
+      .video-card{padding:10px}
+      .controls .btn{padding:10px 12px}
+      .testimonial{flex-direction:column;align-items:flex-start;padding:10px}
+      .t-meta{display:flex;gap:8px;margin-top:8px}
+      .testimonial-wrap aside { order: 2; }
+    }
+
+    /* very small phones */
+    @media (max-width:420px){
+      .typed{font-size:22px}
+      .hero-title{font-size:22px}
+      .avatar-wrap{flex:0 0 96px}
+      .avatar{width:96px;height:96px}
+      .ring{width:120px;height:120px}
+      .cta-row{gap:8px}
+      .btn{padding:10px}
+      .back-to-top{right:12px;bottom:12px;width:44px;height:44px}
+      .t-quote{font-size:12px}
+      .t-name{font-size:12px}
+    }
+
+    /* reduce particle work on small screens by hiding canvas (JS also aborts init when tiny) */
+    @media (max-width:600px){
+      #particles{display:none}
+      #bg-ribbon{filter:blur(38px)}
+    }
+
+    /* small audio toggle label spacing */
+    .audio-toggle { display:inline-flex; align-items:center; gap:8px; font-weight:800; color:var(--muted); }
+    .audio-toggle .small { font-size:13px; color:var(--muted); }
+  </style>
+</head>
+<body>
+  <div id="bg-ribbon" aria-hidden="true"></div>
+
+  <!-- interactive particle canvas -->
+  <canvas id="particles" style="position:fixed;inset:0;z-index:1;pointer-events:none"></canvas>
+
+  <header>
+    <div class="container header-inner">
+      <div class="brand">
+        <h1>Surya Editor</h1>
+        <p>Professional Editing · VFX · Live Preview</p>
+      </div>
+
+      <!-- mobile nav toggle -->
+      <button id="navToggle" class="mobile-nav-toggle focus-ring" aria-expanded="false" aria-controls="mainNav" aria-label="Toggle menu">☰</button>
+
+      <nav id="mainNav" aria-label="Main">
+        <a href="#services" class="focus-ring">Services</a>
+        <a href="#portfolio" class="focus-ring">Portfolio</a>
+        <a href="#contact" class="focus-ring">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-inner">
+        <div class="hero-left">
+          <h2 class="hero-title" aria-hidden="true">
+            <span class="type-wrap">
+              <span class="typed" id="typed-text" aria-live="polite" aria-atomic="true"></span>
+              <span class="typed-caret" aria-hidden="true"></span>
+            </span>
+          </h2>
+
+          <p class="hero-sub">Hi, I’m Surya — I shape clips into high-impact stories. Smooth cuts, bold color, and fast turnaround. Try live previews below.</p>
+
+          <div class="cta-row">
+            <button class="btn primary" id="openContact">Hire Surya</button>
+            <a class="btn" href="#portfolio">Open Portfolio</a>
+            <span class="badge">Live Preview</span>
+
+            <!-- NEW: Background audio toggle (on/off) -->
+            <div class="audio-toggle" style="margin-left:8px;">
+              <div id="audioSwitch" class="switch" role="switch" aria-checked="false" tabindex="0" aria-label="Toggle background music"><div class="knob"></div></div>
+              <div class="small" id="audioLabel">Music Off</div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="avatar-card" id="parallax-card" aria-labelledby="surya-name">
+          <div class="avatar-wrap">
+            <div class="ring" aria-hidden="true"></div>
+            <img id="suryaAvatar" class="avatar" src="surya.jpg" alt="Surya Editor profile — replace with your image">
+          </div>
+          <div class="avatar-meta">
+            <h3 id="surya-name" class="meta-name">Surya Editor</h3>
+            <div class="meta-role">Video & Photo Editor · VFX Creator</div>
+            <div style="display:flex;gap:8px;margin-top:10px">
+              <a class="btn" href="https://www.instagram.com/surya_tnx/" target="_blank" rel="noopener">Instagram</a>
+              <a class="btn" href="https://t.me/SuryaTech02" target="_blank" rel="noopener">Telegram</a>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="services" class="container">
+      <h3>Services</h3>
+      <div class="cards" style="margin-top:12px">
+        <div class="card"><h4>Shorts & Reels</h4><p class="small">Hook-first edits, trendy transitions & color pop.</p></div>
+        <div class="card"><h4>YouTube & Longform</h4><p class="small">Narrative pacing, sound design, cinematic grade.</p></div>
+        <div class="card"><h4>VFX Packs</h4><p class="small">Ready-made VFX and fast integration.</p></div>
+      </div>
+    </section>
+
+    <!-- portfolio with live videos -->
+    <section id="portfolio" class="container" aria-labelledby="portfolio">
+      <h3>Portfolio — Live Videos</h3>
+      <p class="small" style="margin-top:6px">3 demo videos — click here to see .</p>
+
+      <div style="display:flex;align-items:center;gap:12px;margin:18px 0">
+        <div class="toggle">
+          <div id="masterSwitch" class="switch" role="switch" aria-checked="false" tabindex="0" aria-label="Toggle all videos"><div class="knob"></div></div>
+        </div>
+        <div class="small" style="color:var(--muted)">Master ON / OFF</div>
+        <div style="margin-left:auto" class="small" title="Tip">Tip: click thumbnail to play</div>
+      </div>
+
+      <div class="video-grid" aria-live="polite">
+        <!-- You can optionally add data-poster="poster1.jpg" to .video-card elements to show a poster for MP4s -->
+        <div class="video-card" data-index="1" data-src-type="" data-src="">
+          <div class="video-frame" id="frame-1">
+            <div class="placeholder" id="placeholder-1" style="color:var(--muted);padding:8px;text-align:center">Video 1 not configured.</div>
+          </div>
+
+          <div class="controls">
+            <div class="toggle">
+              <div class="switch vid-switch" data-idx="1" role="switch" aria-checked="false" tabindex="0" aria-label="Toggle video 1"><div class="knob"></div></div>
+              <div class="small">Video 1</div>
+            </div>
+            <button class="btn" data-play="1">Play</button>
+            <button class="btn" data-stop="1">Stop</button>
+          </div>
+        </div>
+
+        <div class="video-card" data-index="2" data-src-type="" data-src="">
+          <div class="video-frame" id="frame-2">
+            <div class="placeholder" id="placeholder-2" style="color:var(--muted);padding:8px;text-align:center">Video 2 not configured.</div>
+          </div>
+
+          <div class="controls">
+            <div class="toggle">
+              <div class="switch vid-switch" data-idx="2" role="switch" aria-checked="false" tabindex="0" aria-label="Toggle video 2"><div class="knob"></div></div>
+              <div class="small">Video 2</div>
+            </div>
+            <button class="btn" data-play="2">Play</button>
+            <button class="btn" data-stop="2">Stop</button>
+          </div>
+        </div>
+
+        <div class="video-card" data-index="3" data-src-type="" data-src="">
+          <div class="video-frame" id="frame-3">
+            <div class="placeholder" id="placeholder-3" style="color:var(--muted);padding:8px;text-align:center">Video 3 not configured.</div>
+          </div>
+
+          <div class="controls">
+            <div class="toggle">
+              <div class="switch vid-switch" data-idx="3" role="switch" aria-checked="false" tabindex="0" aria-label="Toggle video 3"><div class="knob"></div></div>
+              <div class="small">Video 3</div>
+            </div>
+            <button class="btn" data-play="3">Play</button>
+            <button class="btn" data-stop="3">Stop</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="testimonials" class="container">
+      <h3>Client Feedback</h3>
+      <div class="testimonial-wrap">
+        <div>
+          <div class="testimonial" data-idx="0">
+            <div style="flex:1">
+              <div class="t-quote">"Kaam bahut accha, bahut jaldi"</div>
+            </div>
+            <div class="t-meta" style="display:flex;align-items:center;gap:8px">
+              <img class="t-avatar" src="https://i.pravatar.cc/56?img=12" alt="Adarsh avatar">
+              <div>
+                <div class="t-name">Adarsh Jaiswal</div>
+                <div class="t-role">Web Developer</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="testimonial" data-idx="1">
+            <div style="flex:1">
+              <div class="t-quote">"Transitions aur color bohot behtareen"</div>
+            </div>
+            <div class="t-meta" style="display:flex;align-items:center;gap:8px">
+              <img class="t-avatar" src="https://i.pravatar.cc/56?img=24" alt="Hitesh avatar">
+              <div>
+                <div class="t-name">Hitesh</div>
+                <div class="t-role">Client</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="testimonial" data-idx="2">
+            <div style="flex:1">
+              <div class="t-quote">"Professional creative hamesha time par"</div>
+            </div>
+            <div class="t-meta" style="display:flex;align-items:center;gap:8px">
+              <img class="t-avatar" src="https://i.pravatar.cc/56?img=33" alt="Mohd Ammman avatar">
+              <div>
+                <div class="t-name">Mohd Ammman</div>
+                <div class="t-role">Client</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <aside style="display:flex;flex-direction:column;gap:12px">
+          <!-- Removed the "Satisfied clients" / stats block as requested -->
+          <div style="display:flex;gap:8px">
+            <button class="btn" id="hireTop">Hire Surya</button>
+            <a class="btn" href="https://www.instagram.com/videoeditor.surya/" target="_blank" rel="noopener">Contact via IG</a>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="contact" class="container">
+      <h3>Contact</h3>
+      <p class="small" style="margin-top:6px">Instagram: <a href="https://www.instagram.com/surya_tnx/" target="_blank" rel="noopener">surya_tnx</a> · Telegram: <a href="https://t.me/SuryaTech02" target="_blank" rel="noopener">SuryaTech02</a></p>
+    </section>
+  </main>
+
+  <footer class="container" style="padding-bottom:64px;color:var(--muted)">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap">
+      <div>© <span id="year"></span> Surya Editor — All rights reserved.</div>
+      <div>Made by <a href="https://www.instagram.com/adar.xhevil/" target="_blank" rel="noopener" style="color:var(--accent1)">DEVELOPER</a></div>
+    </div>
+  </footer>
+
+  <div id="backTop" class="back-to-top" title="Back to top" role="button" tabindex="0" aria-label="Back to top" style="display:none">▲</div>
+
+  <!-- modal -->
+  <div id="modalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal" role="document" aria-labelledby="modalTitle">
+      <h4 id="modalTitle">Hire Surya — Send Details</h4>
+      <p class="small" style="color:var(--muted)">Drop a short brief and your contact. Or message on Instagram.</p>
+      <div style="margin-top:12px">
+        <label class="small">Your name</label>
+        <input class="input" id="c-name" placeholder="Name (optional)">
+      </div>
+      <div style="margin-top:8px">
+        <label class="small">Brief</label>
+        <textarea id="c-brief" rows="4" placeholder="What do you need?"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" id="closeModal">Close</button>
+        <a class="btn primary" id="submitModal" href="https://www.instagram.com/videoeditor.surya/" target="_blank" rel="noopener">Message on IG</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden background audio element (you can set DEFAULT_AUDIO var or pass ?audio=URL) -->
+  <audio id="bgAudio" loop crossorigin="anonymous" style="display:none;"></audio>
+
+  <script>
+    /* -------------------------
+       Config: default videos
+       Edit DEFAULT_VIDEOS (YouTube ID or mp4 URL) or open page with ?v1=...&v2=...&v3=...
+       For background audio, set DEFAULT_AUDIO to your mp3 URL or open with ?audio=...
+
+       Required local files (place in the same folder as this index.html):
+       - surya.jpg
+       - videos/video1.mp4
+       - videos/video2.mp4
+       - videos/video3.mp4
+       - videos/bg-music.mp3  (optional, if you want background music)
+       ------------------------- */
+    const DEFAULT_VIDEOS = ["videos/video1.mp4", "videos/video2.mp4", "videos/video3.mp4"]; // relative paths to your videos/ folder
+    const DEFAULT_AUDIO = "videos/bg-music.mp3"; // optional background audio inside videos/ folder
+
+    /* ---------- utility: extract YouTube ID ---------- */
+    function youtubeID(url){
+      if(!url) return null;
+      try{
+        url = url.trim();
+        // If it's a bare id (no slashes), assume it's an ID
+        if(!url.includes('://') && !url.includes('/') && !url.includes('?')) return url;
+        const u = new URL(url.includes('://') ? url : ('https://'+url));
+        if(u.hostname.includes('youtu.be')) return u.pathname.slice(1);
+        if(u.hostname.includes('youtube.com')){
+          if(u.searchParams.get('v')) return u.searchParams.get('v');
+          const parts = u.pathname.split('/');
+          return parts.pop() || parts.pop();
+        }
+      }catch(e){}
+      return null;
+    }
+
+    /* ---------- render thumbnail or video ----------
+       UPDATED: MP4 now shows a clickable poster/placeholder + play badge so local MP4s play directly.
+       You can set data-poster on .video-card to show a poster for MP4s:
+         <div class="video-card" data-index="1" data-poster="poster1.jpg" ...>
+    */
+    function renderThumbnail(idx, type, src){
+      const frame = document.getElementById('frame-'+idx);
+      if(!frame) return;
+
+      // get optional poster set as data-poster on .video-card (optional)
+      const card = document.querySelector('.video-card[data-index="'+idx+'"]');
+      const poster = card ? card.dataset.poster : '';
+
+      if(type === 'youtube'){
+        const thumb = 'https://img.youtube.com/vi/' + encodeURIComponent(src) + '/hqdefault.jpg';
+        frame.innerHTML = '<img class="video-thumb" src="'+thumb+'" alt="Video '+idx+' thumbnail" loading="lazy"><div class="video-overlay"><div class="play-badge" role="button" tabindex="0" aria-label="Play video '+idx+'">▶</div></div>';
+        const badge = frame.querySelector('.play-badge');
+        const img = frame.querySelector('.video-thumb');
+        const clickHandler = ()=> loadYouTube(idx, src, true);
+        badge.addEventListener('click', clickHandler);
+        badge.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' ') { e.preventDefault(); clickHandler(); }});
+        img.addEventListener('click', clickHandler);
+      } else {
+        // MP4: show poster if available, otherwise compact placeholder + play badge
+        const imgHtml = poster ? '<img class="video-thumb" src="'+poster+'" alt="Video '+idx+' thumbnail" loading="lazy">' : '<div style="color:var(--muted);padding:8px;text-align:center">MP4 ready — press Play</div>';
+        frame.innerHTML = imgHtml + '<div class="video-overlay"><div class="play-badge" role="button" tabindex="0" aria-label="Play video '+idx+'">▶</div></div>';
+        const badge = frame.querySelector('.play-badge');
+        const clickHandler = ()=> loadMP4(idx, src, true);
+        badge.addEventListener('click', clickHandler);
+        badge.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' ') { e.preventDefault(); clickHandler(); }});
+        // also allow clicking the frame (outside the badge) to play
+        frame.addEventListener('click', (ev)=> {
+          // prevent double-firing when clicking the badge itself
+          if(ev.target === badge) return;
+          loadMP4(idx, src, true);
+        });
+      }
+      const sw = document.querySelector('.vid-switch[data-idx="'+idx+'"]');
+      if(sw){ sw.classList.remove('on'); sw.setAttribute('aria-checked','false'); }
+    }
+
+    function loadYouTube(idx, id, autoplay=false){
+      const frame = document.getElementById('frame-'+idx);
+      if(!frame) return;
+      const autoplayParam = autoplay ? '1' : '0';
+      const src = 'https://www.youtube.com/embed/' + encodeURIComponent(id) + '?rel=0&modestbranding=1&playsinline=1&autoplay=' + autoplayParam;
+      frame.innerHTML = '<iframe src="'+src+'" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen title="YouTube video"></iframe>';
+      const sw = document.querySelector('.vid-switch[data-idx="'+idx+'"]');
+      if(sw){ sw.classList.add('on'); sw.setAttribute('aria-checked','true'); }
+    }
+    function loadMP4(idx, url, autoplay=false){
+      const frame = document.getElementById('frame-'+idx);
+      if(!frame) return;
+      // Add muted when autoplay requested to improve autoplay success rate in browsers
+      frame.innerHTML = '<video playsinline controls ' + (autoplay ? 'autoplay muted' : '') + '><source src="'+url+'" type="video/mp4">Your browser does not support video.</video>';
+      const sw = document.querySelector('.vid-switch[data-idx="'+idx+'"]');
+      if(sw){ sw.classList.add('on'); sw.setAttribute('aria-checked','true'); }
+    }
+    function clearFrame(idx){
+      const frame = document.getElementById('frame-'+idx);
+      if(!frame) return;
+      frame.innerHTML = '<div class="placeholder" id="placeholder-'+idx+'" style="color:var(--muted);padding:8px;text-align:center">Video '+idx+' not configured.</div>';
+      const sw = document.querySelector('.vid-switch[data-idx="'+idx+'"]');
+      if(sw){ sw.classList.remove('on'); sw.setAttribute('aria-checked','false'); }
+    }
+
+    /* ---------- Init on DOM ready ---------- */
+    let masterOn = false;
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('year').textContent = new Date().getFullYear();
+
+      // attach play / stop
+      document.querySelectorAll('button[data-play]').forEach(btn=>{
+        btn.addEventListener('click', ()=> {
+          const idx = btn.getAttribute('data-play');
+          const card = document.querySelector('.video-card[data-index="'+idx+'"]');
+          if(!card) return;
+          const src = card.dataset.src;
+          const srcType = card.dataset.srcType;
+          if(!src){ alert('Video '+idx+' not configured. Use DEFAULT_VIDEOS or ?v'+idx+'=...'); return; }
+          if(srcType === 'youtube') loadYouTube(idx, src, true);
+          else loadMP4(idx, src, true);
+        });
+      });
+      document.querySelectorAll('button[data-stop]').forEach(btn=>{
+        btn.addEventListener('click', ()=> {
+          const idx = btn.getAttribute('data-stop');
+          clearFrame(idx);
+        });
+      });
+
+      // per-video switches
+      document.querySelectorAll('.vid-switch').forEach(sw=>{
+        sw.addEventListener('click', ()=> {
+          const idx = sw.getAttribute('data-idx');
+          toggleVideo(idx);
+        });
+        sw.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') { e.preventDefault(); const idx = sw.getAttribute('data-idx'); toggleVideo(idx); }});
+      });
+
+      // master switch
+      const m = document.getElementById('masterSwitch');
+      m.addEventListener('click', masterToggle);
+      m.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') { e.preventDefault(); masterToggle(); }});
+
+      // populate videos from params or DEFAULT_VIDEOS
+      const params = new URLSearchParams(location.search);
+      [1,2,3].forEach(i=>{
+        const v = params.get('v'+i) || DEFAULT_VIDEOS[i-1] || "";
+        const card = document.querySelector('.video-card[data-index="'+i+'"]');
+        if(v && card){
+          const yt = youtubeID(v);
+          if(yt){ card.dataset.srcType = 'youtube'; card.dataset.src = yt; renderThumbnail(i, 'youtube', yt); }
+          else { card.dataset.srcType = 'mp4'; card.dataset.src = v; renderThumbnail(i, 'mp4', v); }
+          const ph = document.getElementById('placeholder-'+i);
+          if(ph) ph.innerText = 'Video '+i+' configured (click thumbnail to play).';
+        }
+      });
+
+      // small keyboard accessibility: space on play-badge works (delegated)
+      document.body.addEventListener('keydown', (e)=>{
+        if(e.key === ' ' && e.target && e.target.classList.contains('play-badge')) { e.preventDefault(); e.target.click(); }
+      });
+
+      // reveal on scroll for testimonials and cards
+      const io = new IntersectionObserver((entries)=>{
+        entries.forEach(en=>{
+          if(en.isIntersecting){
+            en.target.classList.add('in-view');
+          }
+        });
+      }, {threshold:0.12});
+      document.querySelectorAll('.testimonial, .card, .video-card, .avatar-card').forEach(el=> io.observe(el));
+
+      // open modal
+      document.getElementById('openContact').addEventListener('click', openModal);
+      document.getElementById('hireTop').addEventListener('click', openModal);
+      document.getElementById('closeModal').addEventListener('click', closeModal);
+      document.getElementById('modalBackdrop').addEventListener('click', (e)=>{ if(e.target === document.getElementById('modalBackdrop')) closeModal(); });
+      document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeModal(); });
+
+      // back to top
+      const back = document.getElementById('backTop');
+      window.addEventListener('scroll', ()=> { back.style.display = window.scrollY > 400 ? 'flex' : 'none'; });
+      back.addEventListener('click', ()=> window.scrollTo({top:0,behavior:'smooth'}));
+      back.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' ') { e.preventDefault(); window.scrollTo({top:0,behavior:'smooth'}); }});
+
+      // parallax mouse movement on avatar card
+      setupParallax();
+
+      // initialize particles canvas
+      initParticles();
+
+      // initialize typed phrases
+      startTypeWriter();
+
+      // mobile nav toggle behavior
+      const navToggle = document.getElementById('navToggle');
+      const mainNav = document.getElementById('mainNav');
+      navToggle.addEventListener('click', ()=>{
+        const expanded = navToggle.getAttribute('aria-expanded') === 'true';
+        navToggle.setAttribute('aria-expanded', String(!expanded));
+        if(!expanded){ mainNav.classList.add('open'); mainNav.setAttribute('aria-hidden','false'); }
+        else { mainNav.classList.remove('open'); mainNav.setAttribute('aria-hidden','true'); }
+      });
+      // close nav when a link is clicked (mobile)
+      mainNav.querySelectorAll('a').forEach(a=>{
+        a.addEventListener('click', ()=> {
+          if(window.innerWidth <= 700){ mainNav.classList.remove('open'); navToggle.setAttribute('aria-expanded','false'); mainNav.setAttribute('aria-hidden','true'); }
+        });
+      });
+
+      // Accessibility: close mobile nav with escape
+      document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape'){ mainNav.classList.remove('open'); navToggle.setAttribute('aria-expanded','false'); mainNav.setAttribute('aria-hidden','true'); }});
+
+      // Initialize background audio toggle
+      initBackgroundAudio();
+    });
+
+    /* ---------- toggle single video ---------- */
+    function toggleVideo(idx){
+      const sw = document.querySelector('.vid-switch[data-idx="'+idx+'"]');
+      const card = document.querySelector('.video-card[data-index="'+idx+'"]');
+      if(!sw || !card) return;
+      const isOn = sw.classList.contains('on');
+      if(isOn){ clearFrame(idx); }
+      else {
+        const src = card.dataset.src;
+        const srcType = card.dataset.srcType;
+        if(!src){ alert('Video '+idx+' not configured. Provide v'+idx+' via code or URL param.'); return; }
+        if(srcType === 'youtube') loadYouTube(idx, src, true);
+        else loadMP4(idx, src, true);
+      }
+    }
+
+    /* ---------- master toggle ---------- */
+    function masterToggle(){
+      masterOn = !masterOn;
+      const m = document.getElementById('masterSwitch');
+      if(masterOn){ m.classList.add('on'); m.setAttribute('aria-checked','true'); }
+      else { m.classList.remove('on'); m.setAttribute('aria-checked','false'); }
+      document.querySelectorAll('.video-card').forEach(card=>{
+        const idx = card.getAttribute('data-index');
+        const src = card.dataset.src;
+        const srcType = card.dataset.srcType;
+        if(!src) { clearFrame(idx); return; }
+        if(masterOn){
+          if(srcType === 'youtube') loadYouTube(idx, src, true);
+          else loadMP4(idx, src, true);
+        } else clearFrame(idx);
+      });
+    }
+
+    /* ---------- modal functions ---------- */
+    function openModal(){
+      const bd = document.getElementById('modalBackdrop');
+      bd.style.display = 'flex';
+      setTimeout(()=>{ bd.setAttribute('aria-hidden','false'); bd.querySelector('.modal').classList.add('show'); bd.querySelector('.input')?.focus(); }, 30);
+    }
+    function closeModal(){
+      const bd = document.getElementById('modalBackdrop');
+      bd.setAttribute('aria-hidden','true');
+      bd.querySelector('.modal').classList.remove('show');
+      setTimeout(()=>{ bd.style.display = 'none'; }, 220);
+    }
+
+    /* ---------- Typewriter (two-word phrases) ---------- */
+    const TYPE_PHRASES = [
+      "Clean Cuts",
+      "Live Preview",
+      "Fast Edits",
+      "Smooth Motion",
+      "Viral Ready",
+      "Studio Grade",
+      "Quick Turnaround",
+      "Color Pop",
+      "Sound Tweak",
+      "Story First"
+    ];
+    function startTypeWriter(){
+      const el = document.getElementById('typed-text');
+      if(!el) return;
+      let pIdx = 0, cIdx = 0, forward = true;
+      const typeSpeed = 40, deleteSpeed = 28, pauseAfter = 1100, pauseBetween = 320;
+      function tick(){
+        const cur = TYPE_PHRASES[pIdx];
+        if(forward){
+          if(cIdx < cur.length){
+            cIdx++; el.textContent = cur.slice(0,cIdx);
+            setTimeout(tick, typeSpeed + Math.random()*18);
+          } else setTimeout(()=>{ forward=false; tick(); }, pauseAfter);
+        } else {
+          if(cIdx > 0){ cIdx--; el.textContent = cur.slice(0,cIdx); setTimeout(tick, deleteSpeed + Math.random()*12); }
+          else { pIdx = (pIdx+1) % TYPE_PHRASES.length; forward=true; setTimeout(tick, pauseBetween); }
+        }
+      }
+      tick();
+    }
+
+    /* ---------- Parallax for avatar card ---------- */
+    function setupParallax(){
+      const card = document.getElementById('parallax-card');
+      if(!card) return;
+
+      // disable parallax on touch devices for better UX and performance
+      const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+      if(isTouch) {
+        card.style.transform = 'none';
+        return;
+      }
+
+      let rect = null;
+      window.addEventListener('mousemove', (e)=>{
+        rect = rect || card.getBoundingClientRect();
+        const cx = rect.left + rect.width/2;
+        const cy = rect.top + rect.height/2;
+        const dx = (e.clientX - cx)/rect.width;
+        const dy = (e.clientY - cy)/rect.height;
+        // reduce intensity on small widths
+        const w = window.innerWidth;
+        const rx = w < 800 ? dx*5 : dx*8;
+        const ry = w < 800 ? dy*4 : dy*6;
+        card.style.transform = `perspective(900px) rotateX(${(-dy*4).toFixed(2)}deg) rotateY(${(dx*6).toFixed(2)}deg) translateY(-4px)`;
+      });
+      window.addEventListener('mouseleave', ()=> { card.style.transform='none'; });
+    }
+
+    /* ---------- Canvas Particles (interactive) ---------- */
+    function initParticles(){
+      const canvas = document.getElementById('particles');
+      if(!canvas) return;
+      let w=innerWidth, h=innerHeight, dpr = Math.max(1, devicePixelRatio || 1);
+
+      // For mobile / small screens, do not initialize heavy canvas to save resources.
+      if (w < 600) {
+        canvas.style.display = 'none';
+        return;
+      } else {
+        canvas.style.display = 'block';
+      }
+
+      const ctx = canvas.getContext('2d');
+      canvas.width = w * dpr; canvas.height = h * dpr; canvas.style.width = w+'px'; canvas.style.height = h+'px'; ctx.scale(dpr,dpr);
+
+      let mouse = {x: w/2, y: h/2, moved:false};
+      const particles = [];
+      const count = Math.max(28, Math.floor(w/40));
+      for(let i=0;i<count;i++){
+        particles.push({
+          x: Math.random()*w,
+          y: Math.random()*h,
+          vx: (Math.random()-0.5)*0.3,
+          vy: (Math.random()-0.5)*0.3,
+          r: 0.8 + Math.random()*2.6,
+          hue: 200 + Math.random()*60
+        });
+      }
+
+      function resize(){ 
+        w=innerWidth; h=innerHeight;
+        if (w < 600) { canvas.style.display = 'none'; return; }
+        canvas.style.display = 'block';
+        canvas.width = w * dpr; canvas.height = h * dpr; canvas.style.width = w+'px'; canvas.style.height = h+'px'; ctx.scale(dpr,dpr); 
+      }
+      window.addEventListener('resize', resize);
+
+      window.addEventListener('mousemove', (e)=>{ mouse.x = e.clientX; mouse.y = e.clientY; mouse.moved=true; });
+      window.addEventListener('touchmove', (e)=>{ if(e.touches && e.touches[0]){ mouse.x = e.touches[0].clientX; mouse.y = e.touches[0].clientY; mouse.moved=true; } }, {passive:true});
+
+      let last = performance.now();
+      function frame(now){
+        const dt = Math.min(50, now - last); last = now;
+        ctx.clearRect(0,0,w,h);
+
+        // subtle background gradient overlay
+        ctx.fillStyle = 'rgba(2,8,20,0.12)';
+        ctx.fillRect(0,0,w,h);
+
+        particles.forEach(p=>{
+          // attraction to mouse when moved
+          if(mouse.moved){
+            const dx = mouse.x - p.x, dy = mouse.y - p.y;
+            const dist = Math.max(20, Math.sqrt(dx*dx+dy*dy));
+            p.vx += (dx/dist) * 0.0008 * (dt/16);
+            p.vy += (dy/dist) * 0.0008 * (dt/16);
+          }
+          p.x += p.vx * (dt/16) * 1.1;
+          p.y += p.vy * (dt/16) * 1.1;
+
+          // wrap
+          if(p.x < -10) p.x = w + 10;
+          if(p.x > w + 10) p.x = -10;
+          if(p.y < -10) p.y = h + 10;
+          if(p.y > h + 10) p.y = -10;
+
+          // draw
+          ctx.beginPath();
+          const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r*6);
+          g.addColorStop(0, 'rgba(255,140,120,0.18)');
+          g.addColorStop(0.2, 'rgba(255,184,107,0.12)');
+          g.addColorStop(1, 'rgba(2,8,20,0)');
+          ctx.fillStyle = g;
+          ctx.arc(p.x, p.y, p.r*6, 0, Math.PI*2);
+          ctx.fill();
+
+          // small core
+          ctx.beginPath();
+          ctx.fillStyle = 'rgba(255,255,255,0.06)';
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+          ctx.fill();
+        });
+
+        requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+    }
+
+    /* ---------- Background audio support (toggle) ---------- */
+    function initBackgroundAudio(){
+      const audioEl = document.getElementById('bgAudio');
+      const audioSwitch = document.getElementById('audioSwitch');
+      const audioLabel = document.getElementById('audioLabel');
+
+      // determine audio source: URL param ?audio=... or DEFAULT_AUDIO
+      const params = new URLSearchParams(location.search);
+      const audioParam = params.get('audio');
+      const src = audioParam || DEFAULT_AUDIO || "";
+
+      // if no source configured, do nothing (switch disabled)
+      if(!src){
+        audioSwitch.setAttribute('aria-disabled','true');
+        audioSwitch.style.opacity = '0.5';
+        audioSwitch.style.cursor = 'not-allowed';
+        audioLabel.textContent = 'Music (not set)';
+        return;
+      }
+
+      audioEl.src = src;
+      audioEl.preload = 'auto';
+      audioEl.loop = true;
+
+      // try to restore previous state
+      let wasOn = false;
+      try {
+        wasOn = localStorage.getItem('bgAudioOn') === 'true';
+      } catch(e){ wasOn = false; }
+
+      function updateUI(on){
+        if(on){
+          audioSwitch.classList.add('on');
+          audioSwitch.setAttribute('aria-checked','true');
+          audioLabel.textContent = 'Music On';
+        } else {
+          audioSwitch.classList.remove('on');
+          audioSwitch.setAttribute('aria-checked','false');
+          audioLabel.textContent = 'Music Off';
+        }
+      }
+
+      async function playAudio(){
+        try {
+          await audioEl.play();
+          updateUI(true);
+          try { localStorage.setItem('bgAudioOn','true'); } catch(e){}
+        } catch(e){
+          // autoplay might be blocked; show as off
+          updateUI(false);
+        }
+      }
+      function pauseAudio(){
+        try { audioEl.pause(); } catch(e){}
+        updateUI(false);
+        try { localStorage.setItem('bgAudioOn','false'); } catch(e){}
+      }
+
+      // click and keyboard handlers
+      audioSwitch.addEventListener('click', ()=>{
+        const isOn = audioSwitch.classList.contains('on');
+        if(isOn) pauseAudio(); else playAudio();
+      });
+      audioSwitch.addEventListener('keydown', (e)=>{ if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); audioSwitch.click(); }});
+
+      // start based on stored preference (try to play)
+      if(wasOn){
+        // some browsers require user gesture; attempt play - if blocked UI remains off
+        playAudio();
+      }
+    }
+
+  </script>
+</body>
+</html>
