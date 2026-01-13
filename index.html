@@ -1,33 +1,29 @@
-<!doctype html>
+ <!doctype html>
 <html lang="hi">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Surya Editor — Live Videos</title>
   <meta name="description" content="Surya Editor — professional animated portfolio with live video previews" />
-  <meta name="theme-color" content="#071226">
+  <meta name="theme-color" content="#0b5563">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <style>
     /*
-      Advanced / "hard level" visual upgrade:
-      - Animated gradient background (moving)
-      - Canvas particle system (interactive)
-      - Parallax on mouse move
-      - Polished hero with animated two-word phrases
-      - Smooth reveal on scroll (IntersectionObserver)
-      - Card tilt + depth shadows
-      - Animated thumbnails + play pulse
-      - Modal contact form with animation
-      - Accessible keyboard interactions
-      - Mobile-friendly improvements added (responsive nav, reduced particles on small screens, touch-friendly controls)
-      - Client feedback area compacted as requested
+      Theme: Modern deep-indigo → teal gradient (visually balanced, high contrast)
+      - Background updated to a deep indigo -> teal gradient
+      - Ribbon, particles and accents updated to matching cyan/teal hues
+      All original interactive features preserved.
     */
 
     :root{
-      --bg1:#031022; --bg2:#071226;
-      --card:#0e1a27;
-      --accent1:#ffb86b; --accent2:#ff7b7b;
-      --muted:#93a8bf; --text:#eaf4ff;
+      /* Selected "best" color theme: deep indigo -> teal */
+      --bg1:#031226;   /* deep indigo */
+      --bg2:#0b5563;   /* teal */
+      --card:#082b33;
+      --accent1:#45e3c9; /* mint-cyan */
+      --accent2:#6ad3ff; /* soft cyan */
+      --muted:#9fdad2;
+      --text:#e8fbff;
       --glass: rgba(255,255,255,0.03);
       --radius:14px;
       --container:1140px;
@@ -39,9 +35,10 @@
     body{
       margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
       color:var(--text); -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
-      background: radial-gradient(600px 300px at 10% 15%, rgba(255,120,120,0.03), transparent 12%),
-                  radial-gradient(500px 300px at 90% 80%, rgba(110,200,255,0.02), transparent 12%),
-                  linear-gradient(180deg,var(--bg1),var(--bg2));
+      background:
+        radial-gradient(600px 300px at 10% 15%, rgba(69,227,201,0.04), transparent 12%),
+        radial-gradient(500px 300px at 90% 80%, rgba(106,211,255,0.02), transparent 12%),
+        linear-gradient(180deg,var(--bg1),var(--bg2));
       overflow-x:hidden;
       -webkit-tap-highlight-color: transparent;
     }
@@ -49,7 +46,7 @@
     /* animated gradient ribbon behind header */
     #bg-ribbon {
       position:fixed; inset: -20% -30% auto -30%; height:60vh; pointer-events:none; z-index:0;
-      background: linear-gradient(90deg, rgba(255,120,120,0.06), rgba(110,200,255,0.04), rgba(255,120,120,0.02));
+      background: linear-gradient(90deg, rgba(69,227,201,0.08), rgba(106,211,255,0.05), rgba(69,227,201,0.03));
       filter: blur(48px); transform: translateY(-8%); transition:transform .6s ease; mix-blend-mode:screen;
       animation: ribbonMove 12s linear infinite;
     }
@@ -92,7 +89,7 @@
     }
     .typed-caret{
       width:3px;height:1.02em;background:linear-gradient(180deg,#fff,#fff);border-radius:2px;
-      animation:blink .9s steps(2,start) infinite; box-shadow:0 0 12px rgba(255,140,120,0.6);
+      animation:blink .9s steps(2,start) infinite; box-shadow:0 0 12px rgba(69,227,201,0.6);
     }
     @keyframes blink {50%{opacity:0}}
 
@@ -102,7 +99,7 @@
     .cta-row{display:flex;gap:12px;align-items:center;margin-top:18px;flex-wrap:wrap}
     .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;text-decoration:none;color:var(--text);background:var(--glass);border:1px solid rgba(255,255,255,0.03);font-weight:800;cursor:pointer;transition:transform .16s ease, box-shadow .16s ease}
     .btn:hover{transform:translateY(-6px);box-shadow:var(--shadow)}
-    .btn.primary{background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#071226}
+    .btn.primary{background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#063b27}
 
     .badge{display:inline-block;padding:6px 10px;border-radius:999px;background:linear-gradient(90deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));font-weight:800;color:var(--accent1);border:1px solid rgba(255,255,255,0.02)}
 
@@ -117,7 +114,7 @@
     .avatar-wrap{position:relative;width:120px;height:120px;flex:0 0 120px}
     .avatar{width:120px;height:120px;border-radius:999px;display:block;object-fit:cover;border:4px solid rgba(255,255,255,0.04);box-shadow:0 18px 40px rgba(2,8,20,0.55);transition:transform .28s}
     .avatar:hover{transform:scale(1.04)}
-    .ring{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:152px;height:152px;border-radius:999px;background:conic-gradient(from 0deg, rgba(255,184,107,0.08), rgba(255,123,123,0.06));filter:blur(10px);opacity:0.95;animation:spin 10s linear infinite}
+    .ring{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:152px;height:152px;border-radius:999px;background:conic-gradient(from 0deg, rgba(69,227,201,0.08), rgba(106,211,255,0.06));filter:blur(10px);opacity:0.95;animation:spin 10s linear infinite}
     @keyframes spin{from{transform:translate(-50%,-50%) rotate(0deg)} to{transform:translate(-50%,-50%) rotate(360deg)}}
     .meta-name{font-weight:800;font-size:18px;margin:0}
     .meta-role{color:var(--muted);margin:6px 0 12px}
@@ -136,16 +133,16 @@
     .video-frame iframe, .video-frame video, .video-frame img{width:100%;height:100%;object-fit:cover;display:block}
     .video-thumb{width:100%;height:100%;object-fit:cover;display:block;cursor:pointer;transition:transform .4s ease}
     .video-card:hover .video-thumb{transform:scale(1.03)}
-    .play-badge{position:absolute;z-index:6;background:linear-gradient(90deg,var(--accent1),var(--accent2));width:60px;height:60px;border-radius:999px;display:flex;align-items:center;justify-content:center;color:#071226;font-weight:900;box-shadow:0 14px 40px rgba(2,8,20,0.5);cursor:pointer;pointer-events:auto;animation:playPulse 2000ms infinite}
+    .play-badge{position:absolute;z-index:6;background:linear-gradient(90deg,var(--accent1),var(--accent2));width:60px;height:60px;border-radius:999px;display:flex;align-items:center;justify-content:center;color:#063b27;font-weight:900;box-shadow:0 14px 40px rgba(2,8,20,0.5);cursor:pointer;pointer-events:auto;animation:playPulse 2000ms infinite}
     @keyframes playPulse{0%{transform:scale(1)}50%{transform:scale(1.06)}100%{transform:scale(1)}}
     .video-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
 
     .controls{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap}
     .toggle{display:inline-flex;align-items:center;gap:8px}
-    .switch{width:46px;height:26px;border-radius:999px;background:#0b1220;border:1px solid rgba(255,255,255,0.04);position:relative;cursor:pointer}
+    .switch{width:46px;height:26px;border-radius:999px;background:#072217;border:1px solid rgba(255,255,255,0.04);position:relative;cursor:pointer}
     .knob{position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;transition:left .18s ease, background .18s ease}
     .switch.on{background:linear-gradient(90deg,var(--accent1),var(--accent2))}
-    .switch.on .knob{left:23px;background:#071226}
+    .switch.on .knob{left:23px;background:#063b27}
 
     /* testimonials stacked cards with animation (compacted) */
     .testimonial{display:flex;gap:10px;align-items:flex-start;padding:10px;border-radius:8px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);border:1px solid rgba(255,255,255,0.02);margin-bottom:10px;transform:translateY(8px);opacity:0;transition:all .5s cubic-bezier(.2,.9,.2,1)}
@@ -157,15 +154,12 @@
     .t-name{font-weight:800;font-size:13px}
     .t-role{font-size:12px;color:var(--muted)}
 
-    /* reduce overall testimonial wrapper width (aside column) */
     .testimonial-wrap { margin-top:12px; display:grid; grid-template-columns: 1fr 260px; gap:12px; align-items:start; }
-
-    /* smaller card in the aside */
     .testimonial-wrap aside > div { padding:12px; border-radius:10px; }
 
     /* modal contact */
     .modal-backdrop{position:fixed;inset:0;background:rgba(2,8,15,0.6);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:120}
-    .modal{width:min(640px,94%);background:linear-gradient(180deg,#061022,#071226);border-radius:12px;padding:18px;border:1px solid rgba(255,255,255,0.04);box-shadow:0 30px 80px rgba(2,8,20,0.7);transform:translateY(20px) scale(.98);transition:all .28s ease}
+    .modal{width:min(640px,94%);background:linear-gradient(180deg,#061226,#063b27);border-radius:12px;padding:18px;border:1px solid rgba(255,255,255,0.04);box-shadow:0 30px 80px rgba(2,8,20,0.7);transform:translateY(20px) scale(.98);transition:all .28s ease}
     .modal.show{transform:none}
     .modal h4{margin:0 0 8px}
     .form-row{display:flex;gap:8px;flex-wrap:wrap}
@@ -173,7 +167,7 @@
     .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
 
     footer{border-top:1px solid rgba(255,255,255,0.02);padding:20px 0;color:var(--muted)}
-    .back-to-top{position:fixed;right:18px;bottom:18px;background:linear-gradient(90deg,var(--accent1),var(--accent2));width:46px;height:46px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#071226;cursor:pointer;box-shadow:0 12px 40px rgba(2,8,20,0.5);z-index:80}
+    .back-to-top{position:fixed;right:18px;bottom:18px;background:linear-gradient(90deg,var(--accent1),var(--accent2));width:46px;height:46px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#063b27;cursor:pointer;box-shadow:0 12px 40px rgba(2,8,20,0.5);z-index:80}
     .focus-ring:focus{outline:3px solid rgba(255,255,255,0.06);outline-offset:3px}
 
     /* Responsive / mobile-friendly adjustments */
@@ -187,7 +181,6 @@
       .testimonial { flex-direction:row; }
     }
 
-    /* more compact mobile tweaks */
     @media (max-width:700px){
       .container{padding:18px}
       .hero{padding:36px 0 24px}
@@ -199,11 +192,11 @@
       .btn{padding:10px 12px}
       .play-badge{width:52px;height:52px;font-size:18px}
       .mobile-nav-toggle{display:inline-flex}
-      nav{display:none} /* hidden by default on smaller screens, toggled with JS */
+      nav{display:none}
       nav.open{
         display:flex; flex-direction:column; gap:8px;
         position:fixed; right:12px; top:66px; background:linear-gradient(180deg, rgba(2,8,15,0.96), rgba(2,8,15,0.98)); padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.03); z-index:90;
-        box-shadow:0 10px 40px rgba(2,8,20,0.6);
+        box-shadow:0 10px 40px rgba(2,8,15,0.6);
       }
       .header-inner{position:relative}
       .video-card{padding:10px}
@@ -213,7 +206,6 @@
       .testimonial-wrap aside { order: 2; }
     }
 
-    /* very small phones */
     @media (max-width:420px){
       .typed{font-size:22px}
       .hero-title{font-size:22px}
@@ -237,7 +229,7 @@
     .audio-toggle { display:inline-flex; align-items:center; gap:8px; font-weight:800; color:var(--muted); }
     .audio-toggle .small { font-size:13px; color:var(--muted); }
 
-    /* ---------- APK section (compact) ---------- */
+    /* APK styles (kept) */
     .apk-grid{
       display:grid;
       grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
@@ -313,7 +305,7 @@
             <a class="btn" href="#portfolio">Open Portfolio</a>
             <span class="badge">Live Preview</span>
 
-            <!-- NEW: Background audio toggle (on/off) -->
+            <!-- Background audio toggle (on/off) -->
             <div class="audio-toggle" style="margin-left:8px;">
               <div id="audioSwitch" class="switch" role="switch" aria-checked="false" tabindex="0" aria-label="Toggle background music"><div class="knob"></div></div>
               <div class="small" id="audioLabel">Music Off</div>
@@ -361,7 +353,6 @@
       </div>
 
       <div class="video-grid" aria-live="polite">
-        <!-- You can optionally add data-poster="poster1.jpg" to .video-card elements to show a poster for MP4s -->
         <div class="video-card" data-index="1" data-src-type="" data-src="">
           <div class="video-frame" id="frame-1">
             <div class="placeholder" id="placeholder-1" style="color:var(--muted);padding:8px;text-align:center">Video 1 not configured.</div>
@@ -409,7 +400,7 @@
       </div>
     </section>
 
-    <!-- NEW: Compact APK Downloads section (MB removed as requested) -->
+    <!-- Compact APK Downloads section -->
     <section id="apks" class="container" aria-labelledby="apks-title">
       <h3 id="apks-title">APK Downloads — Compact</h3>
       <p class="small" style="margin-top:6px">Five APKs — click to download. (Place your .apk files inside the apks/ folder or set correct links.)</p>
@@ -517,7 +508,6 @@
         </div>
 
         <aside style="display:flex;flex-direction:column;gap:12px">
-          <!-- Removed the "Satisfied clients" / stats block as requested -->
           <div style="display:flex;gap:8px">
             <button class="btn" id="hireTop">Hire Surya</button>
             <a class="btn" href="https://www.instagram.com/videoeditor.surya/" target="_blank" rel="noopener">Contact via IG</a>
@@ -561,31 +551,19 @@
     </div>
   </div>
 
-  <!-- Hidden background audio element (you can set DEFAULT_AUDIO var or pass ?audio=URL) -->
+  <!-- Hidden background audio element (same behavior) -->
   <audio id="bgAudio" loop crossorigin="anonymous" style="display:none;"></audio>
 
   <script>
-    /* -------------------------
-       Config: default videos
-       Edit DEFAULT_VIDEOS (YouTube ID or mp4 URL) or open page with ?v1=...&v2=...&v3=...
-       For background audio, set DEFAULT_AUDIO to your mp3 URL or open with ?audio=...
-
-       Required local files (place in the same folder as this index.html):
-       - surya.jpg
-       - videos/video1.mp4
-       - videos/video2.mp4
-       - videos/video3.mp4
-       - videos/bg-music.mp3  (optional, if you want background music)
-       ------------------------- */
-    const DEFAULT_VIDEOS = ["videos/video1.mp4", "videos/video2.mp4", "videos/video3.mp4"]; // relative paths to your videos/ folder
-    const DEFAULT_AUDIO = "videos/bg-music.mp3"; // optional background audio inside videos/ folder
+    /* ---------- CONFIG (same as before) ---------- */
+    const DEFAULT_VIDEOS = ["videos/video1.mp4", "videos/video2.mp4", "videos/video3.mp4"];
+    const DEFAULT_AUDIO = "videos/bg-music.mp3";
 
     /* ---------- utility: extract YouTube ID ---------- */
     function youtubeID(url){
       if(!url) return null;
       try{
         url = url.trim();
-        // If it's a bare id (no slashes), assume it's an ID
         if(!url.includes('://') && !url.includes('/') && !url.includes('?')) return url;
         const u = new URL(url.includes('://') ? url : ('https://'+url));
         if(u.hostname.includes('youtu.be')) return u.pathname.slice(1);
@@ -598,16 +576,11 @@
       return null;
     }
 
-    /* ---------- render thumbnail or video ----------
-       UPDATED: MP4 now shows a clickable poster/placeholder + play badge so local MP4s play directly.
-       You can set data-poster on .video-card to show a poster for MP4s:
-         <div class="video-card" data-index="1" data-poster="poster1.jpg" ...>
-    */
+    /* ---------- render thumbnail or video ---------- */
     function renderThumbnail(idx, type, src){
       const frame = document.getElementById('frame-'+idx);
       if(!frame) return;
 
-      // get optional poster set as data-poster on .video-card (optional)
       const card = document.querySelector('.video-card[data-index="'+idx+'"]');
       const poster = card ? card.dataset.poster : '';
 
@@ -621,16 +594,13 @@
         badge.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' ') { e.preventDefault(); clickHandler(); }});
         img.addEventListener('click', clickHandler);
       } else {
-        // MP4: show poster if available, otherwise compact placeholder + play badge
         const imgHtml = poster ? '<img class="video-thumb" src="'+poster+'" alt="Video '+idx+' thumbnail" loading="lazy">' : '<div style="color:var(--muted);padding:8px;text-align:center">MP4 ready — press Play</div>';
         frame.innerHTML = imgHtml + '<div class="video-overlay"><div class="play-badge" role="button" tabindex="0" aria-label="Play video '+idx+'">▶</div></div>';
         const badge = frame.querySelector('.play-badge');
         const clickHandler = ()=> loadMP4(idx, src, true);
         badge.addEventListener('click', clickHandler);
         badge.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' ') { e.preventDefault(); clickHandler(); }});
-        // also allow clicking the frame (outside the badge) to play
         frame.addEventListener('click', (ev)=> {
-          // prevent double-firing when clicking the badge itself
           if(ev.target === badge) return;
           loadMP4(idx, src, true);
         });
@@ -651,7 +621,6 @@
     function loadMP4(idx, url, autoplay=false){
       const frame = document.getElementById('frame-'+idx);
       if(!frame) return;
-      // Add muted when autoplay requested to improve autoplay success rate in browsers
       frame.innerHTML = '<video playsinline controls ' + (autoplay ? 'autoplay muted' : '') + '><source src="'+url+'" type="video/mp4">Your browser does not support video.</video>';
       const sw = document.querySelector('.vid-switch[data-idx="'+idx+'"]');
       if(sw){ sw.classList.add('on'); sw.setAttribute('aria-checked','true'); }
@@ -777,7 +746,8 @@
       initBackgroundAudio();
     });
 
-    /* ---------- toggle single video ---------- */
+    /* ---------- rest of JS functions (same behavior) ---------- */
+
     function toggleVideo(idx){
       const sw = document.querySelector('.vid-switch[data-idx="'+idx+'"]');
       const card = document.querySelector('.video-card[data-index="'+idx+'"]');
@@ -793,7 +763,6 @@
       }
     }
 
-    /* ---------- master toggle ---------- */
     function masterToggle(){
       masterOn = !masterOn;
       const m = document.getElementById('masterSwitch');
@@ -811,7 +780,6 @@
       });
     }
 
-    /* ---------- modal functions ---------- */
     function openModal(){
       const bd = document.getElementById('modalBackdrop');
       bd.style.display = 'flex';
@@ -824,7 +792,6 @@
       setTimeout(()=>{ bd.style.display = 'none'; }, 220);
     }
 
-    /* ---------- Typewriter (two-word phrases) ---------- */
     const TYPE_PHRASES = [
       "Clean Cuts",
       "Live Preview",
@@ -857,12 +824,10 @@
       tick();
     }
 
-    /* ---------- Parallax for avatar card ---------- */
     function setupParallax(){
       const card = document.getElementById('parallax-card');
       if(!card) return;
 
-      // disable parallax on touch devices for better UX and performance
       const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
       if(isTouch) {
         card.style.transform = 'none';
@@ -876,22 +841,17 @@
         const cy = rect.top + rect.height/2;
         const dx = (e.clientX - cx)/rect.width;
         const dy = (e.clientY - cy)/rect.height;
-        // reduce intensity on small widths
         const w = window.innerWidth;
-        const rx = w < 800 ? dx*5 : dx*8;
-        const ry = w < 800 ? dy*4 : dy*6;
         card.style.transform = `perspective(900px) rotateX(${(-dy*4).toFixed(2)}deg) rotateY(${(dx*6).toFixed(2)}deg) translateY(-4px)`;
       });
       window.addEventListener('mouseleave', ()=> { card.style.transform='none'; });
     }
 
-    /* ---------- Canvas Particles (interactive) ---------- */
     function initParticles(){
       const canvas = document.getElementById('particles');
       if(!canvas) return;
       let w=innerWidth, h=innerHeight, dpr = Math.max(1, devicePixelRatio || 1);
 
-      // For mobile / small screens, do not initialize heavy canvas to save resources.
       if (w < 600) {
         canvas.style.display = 'none';
         return;
@@ -912,7 +872,7 @@
           vx: (Math.random()-0.5)*0.3,
           vy: (Math.random()-0.5)*0.3,
           r: 0.8 + Math.random()*2.6,
-          hue: 200 + Math.random()*60
+          hue: 160 + Math.random()*40
         });
       }
 
@@ -932,12 +892,10 @@
         const dt = Math.min(50, now - last); last = now;
         ctx.clearRect(0,0,w,h);
 
-        // subtle background gradient overlay
-        ctx.fillStyle = 'rgba(2,8,20,0.12)';
+        ctx.fillStyle = 'rgba(2,12,8,0.12)';
         ctx.fillRect(0,0,w,h);
 
         particles.forEach(p=>{
-          // attraction to mouse when moved
           if(mouse.moved){
             const dx = mouse.x - p.x, dy = mouse.y - p.y;
             const dist = Math.max(20, Math.sqrt(dx*dx+dy*dy));
@@ -947,23 +905,20 @@
           p.x += p.vx * (dt/16) * 1.1;
           p.y += p.vy * (dt/16) * 1.1;
 
-          // wrap
           if(p.x < -10) p.x = w + 10;
           if(p.x > w + 10) p.x = -10;
           if(p.y < -10) p.y = h + 10;
           if(p.y > h + 10) p.y = -10;
 
-          // draw
           ctx.beginPath();
           const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r*6);
-          g.addColorStop(0, 'rgba(255,140,120,0.18)');
-          g.addColorStop(0.2, 'rgba(255,184,107,0.12)');
-          g.addColorStop(1, 'rgba(2,8,20,0)');
+          g.addColorStop(0, 'rgba(69,227,201,0.18)');
+          g.addColorStop(0.2, 'rgba(106,211,255,0.12)');
+          g.addColorStop(1, 'rgba(2,12,8,0)');
           ctx.fillStyle = g;
           ctx.arc(p.x, p.y, p.r*6, 0, Math.PI*2);
           ctx.fill();
 
-          // small core
           ctx.beginPath();
           ctx.fillStyle = 'rgba(255,255,255,0.06)';
           ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
@@ -975,18 +930,16 @@
       requestAnimationFrame(frame);
     }
 
-    /* ---------- Background audio support (toggle) ---------- */
+    /* Background audio support */
     function initBackgroundAudio(){
       const audioEl = document.getElementById('bgAudio');
       const audioSwitch = document.getElementById('audioSwitch');
       const audioLabel = document.getElementById('audioLabel');
 
-      // determine audio source: URL param ?audio=... or DEFAULT_AUDIO
       const params = new URLSearchParams(location.search);
       const audioParam = params.get('audio');
       const src = audioParam || DEFAULT_AUDIO || "";
 
-      // if no source configured, do nothing (switch disabled)
       if(!src){
         audioSwitch.setAttribute('aria-disabled','true');
         audioSwitch.style.opacity = '0.5';
@@ -999,7 +952,6 @@
       audioEl.preload = 'auto';
       audioEl.loop = true;
 
-      // try to restore previous state
       let wasOn = false;
       try {
         wasOn = localStorage.getItem('bgAudioOn') === 'true';
@@ -1023,7 +975,6 @@
           updateUI(true);
           try { localStorage.setItem('bgAudioOn','true'); } catch(e){}
         } catch(e){
-          // autoplay might be blocked; show as off
           updateUI(false);
         }
       }
@@ -1033,16 +984,13 @@
         try { localStorage.setItem('bgAudioOn','false'); } catch(e){}
       }
 
-      // click and keyboard handlers
       audioSwitch.addEventListener('click', ()=>{
         const isOn = audioSwitch.classList.contains('on');
         if(isOn) pauseAudio(); else playAudio();
       });
       audioSwitch.addEventListener('keydown', (e)=>{ if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); audioSwitch.click(); }});
 
-      // start based on stored preference (try to play)
       if(wasOn){
-        // some browsers require user gesture; attempt play - if blocked UI remains off
         playAudio();
       }
     }
