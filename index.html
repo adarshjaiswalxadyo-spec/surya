@@ -934,70 +934,82 @@
       requestAnimationFrame(frame);
     }
 
-    /* ---------- Background audio support (toggle) ---------- */
-    function initBackgroundAudio(){
-      const audioEl = document.getElementById('bgAudio');
-      const audioSwitch = document.getElementById('audioSwitch');
-      const audioLabel = document.getElementById('audioLabel');
+ <script>
+/* ---------- Background audio support (toggle) ---------- */
+function initBackgroundAudio(){
+  const audioEl = document.getElementById('bgAudio');
+  const audioSwitch = document.getElementById('audioSwitch');
+  const audioLabel = document.getElementById('audioLabel');
 
-      const params = new URLSearchParams(location.search);
-      const audioParam = params.get('audio');
-      const src = audioParam || DEFAULT_AUDIO || "";
+  const params = new URLSearchParams(location.search);
+  const audioParam = params.get('audio');
+  const src = audioParam || DEFAULT_AUDIO || "";
 
-      if(!src){
-        audioSwitch.setAttribute('aria-disabled','true');
-        audioSwitch.style.opacity = '0.5';
-        audioSwitch.style.cursor = 'not-allowed';
-        audioLabel.textContent = 'Music (not set)';
-        return;
-      }
+  if(!src){
+    audioSwitch.setAttribute('aria-disabled','true');
+    audioSwitch.style.opacity = '0.5';
+    audioSwitch.style.cursor = 'not-allowed';
+    audioLabel.textContent = 'Music not set';
+    return;
+  }
 
-      audioEl.src = src;
-      audioEl.preload = 'auto';
-      audioEl.loop = true;
+  audioEl.src = src;
+  audioEl.loop = true;
+  audioEl.preload = 'auto';
 
-      let wasOn = false;
-      try {
-        wasOn = localStorage.getItem('bgAudioOn') === 'true';
-      } catch(e){ wasOn = false; }
+  let isOn = false;
+  try{
+    isOn = localStorage.getItem('bgAudioOn') === 'true';
+  }catch(e){}
 
-      function updateUI(on){
-        if(on){
-          audioSwitch.classList.add('on');
-          audioSwitch.setAttribute('aria-checked','true');
-          audioLabel.textContent = 'Music On';
-        } else {
-          audioSwitch.classList.remove('on');
-          audioSwitch.setAttribute('aria-checked','false');
-          audioLabel.textContent = 'Music Off';
-        }
-      }
-
-      async function playAudio(){
-        try {
-          await audioEl.play();
-          updateUI(true);
-          try { localStorage.setItem('bgAudioOn','true'); } catch(e){}
-        } catch(e){
-          updateUI(false);
-        }
-      }
-      function pauseAudio(){
-        try { audioEl.pause(); } catch(e){}
-        updateUI(false);
-        try { localStorage.setItem('bgAudioOn','false'); } catch(e){}
-      }
-
-      audioSwitch.addEventListener('click', ()=>{
-        const isOn = audioSwitch.classList.contains('on');
-        if(isOn) pauseAudio(); else playAudio();
-      });
-      audioSwitch.addEventListener('keydown', (e)=>{ if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); audioSwitch.click(); }});
-
-      if(wasOn){
-        playAudio();
-      }
+  function updateUI(on){
+    if(on){
+      audioSwitch.classList.add('on');
+      audioSwitch.setAttribute('aria-checked','true');
+      audioLabel.textContent = 'Music On';
+    }else{
+      audioSwitch.classList.remove('on');
+      audioSwitch.setAttribute('aria-checked','false');
+      audioLabel.textContent = 'Music Off';
     }
+  }
+
+  async function playAudio(){
+    try{
+      await audioEl.play();
+      isOn = true;
+      localStorage.setItem('bgAudioOn','true');
+      updateUI(true);
+    }catch(err){
+      console.warn('Autoplay blocked:', err);
+    }
+  }
+
+  function stopAudio(){
+    audioEl.pause();
+    audioEl.currentTime = 0;
+    isOn = false;
+    localStorage.setItem('bgAudioOn','false');
+    updateUI(false);
+  }
+
+  audioSwitch.addEventListener('click', ()=>{
+    if(isOn) stopAudio();
+    else playAudio();
+  });
+
+  audioSwitch.addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter' || e.key === ' '){
+      e.preventDefault();
+      if(isOn) stopAudio();
+      else playAudio();
+    }
+  });
+
+  updateUI(isOn);
+  if(isOn) playAudio();
+}
+</script>
 
   </script>
 </body>
