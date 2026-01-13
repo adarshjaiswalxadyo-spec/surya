@@ -1,35 +1,39 @@
-
-<!doctype html>
+ <!doctype html>
 <html lang="hi">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Surya Editor — Live Videos</title>
   <meta name="description" content="Surya Editor — professional animated portfolio with live video previews" />
-  <meta name="theme-color" content="#700000">
+  <meta name="theme-color" content="#071226">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <style>
     /*
-      Restored full original features and added animated RED background.
-      All previous interactive features preserved:
-        - animated ribbon
-        - particles
-        - parallax
-        - typewriter
-        - video grid & play
-        - modal, accessibility, APKs, testimonials, back-to-top
+      Updated: Added "Apps" mini-tools and a handful of UX/accessibility features:
+      - Apps: Color Grader, Quick Trimmer, Subtitle Drawer, VFX Presets, Thumbnail Capture
+      - Theme toggle (dark / light)
+      - Keyboard shortcuts (space play/pause, m mute, f fullscreen)
+      - Per-video download / mute button for MP4s, duration preview
+      - Pause particle render when tab hidden to save resources
+      - Reduced particles when scrolling past hero
+      - Improved focus outlines
     */
 
     :root{
-      /* RED theme */
-      --bg1:#140102; --bg2:#3a0000;
-      --card:#2a0f11;
-      --accent1:#ff5a5a; --accent2:#ffb3b3;
-      --muted:#b79aa0; --text:#ffeef0;
+      --bg1:#031022; --bg2:#071226;
+      --card:#0e1a27;
+      --accent1:#ffb86b; --accent2:#ff7b7b;
+      --muted:#93a8bf; --text:#eaf4ff;
       --glass: rgba(255,255,255,0.03);
       --radius:14px;
       --container:1140px;
-      --shadow: 0 20px 50px rgba(20,6,6,0.6);
+      --shadow: 0 20px 50px rgba(2,8,20,0.6);
+    }
+
+    [data-theme="light"]{
+      --bg1:#f7fbff; --bg2:#eef6ff; --card:#ffffff; --text:#071226; --muted:#5b6b7a; --glass: rgba(0,0,0,0.03);
+      --accent1:#ff8c42; --accent2:#ff6677;
+      background-color:var(--bg1);
     }
 
     *{box-sizing:border-box}
@@ -37,19 +41,19 @@
     body{
       margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
       color:var(--text); -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
-      /* RED animated background: radial red glows + linear gradient */
-      background:
-        radial-gradient(600px 300px at 10% 15%, rgba(255,90,90,0.06), transparent 12%),
-        radial-gradient(500px 300px at 90% 80%, rgba(255,160,160,0.03), transparent 12%),
-        linear-gradient(180deg,var(--bg1),var(--bg2));
+      background: radial-gradient(600px 300px at 10% 15%, rgba(255,120,120,0.03), transparent 12%),
+                  radial-gradient(500px 300px at 90% 80%, rgba(110,200,255,0.02), transparent 12%),
+                  linear-gradient(180deg,var(--bg1),var(--bg2));
       overflow-x:hidden;
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* animated gradient ribbon behind header (red) */
+    /* improved focus ring for keyboard users */
+    .focus-ring:focus { outline: 3px solid rgba(255,184,107,0.14); outline-offset:3px; border-radius:8px }
+
     #bg-ribbon {
       position:fixed; inset: -20% -30% auto -30%; height:60vh; pointer-events:none; z-index:0;
-      background: linear-gradient(90deg, rgba(255,90,90,0.08), rgba(255,140,140,0.05), rgba(255,80,80,0.03));
+      background: linear-gradient(90deg, rgba(255,120,120,0.06), rgba(110,200,255,0.04), rgba(255,120,120,0.02));
       filter: blur(48px); transform: translateY(-8%); transition:transform .6s ease; mix-blend-mode:screen;
       animation: ribbonMove 12s linear infinite;
     }
@@ -59,16 +63,20 @@
 
     header{
       position:sticky; top:0; z-index:60; padding:12px 0; backdrop-filter: blur(6px);
-      background: linear-gradient(180deg, rgba(20,6,6,0.44), rgba(20,6,6,0.08)); border-bottom:1px solid rgba(255,255,255,0.02);
+      background: linear-gradient(180deg, rgba(2,8,15,0.44), rgba(2,8,15,0.08)); border-bottom:1px solid rgba(255,255,255,0.02);
     }
     .header-inner{display:flex;align-items:center;justify-content:space-between;gap:16px}
     .brand h1{margin:0;font-size:20px} .brand p{margin:2px 0 0;color:var(--muted);font-size:13px}
     nav a{color:var(--muted);text-decoration:none;margin-left:16px;font-weight:700;padding:6px 8px;border-radius:8px}
     nav a:hover, nav a:focus{color:var(--text);background:rgba(255,255,255,0.02);outline:none;transform:translateY(-2px)}
 
-    /* mobile nav toggle (hidden by default on desktop) */
     .mobile-nav-toggle{display:none;background:transparent;border:0;color:var(--muted);font-weight:800;padding:10px;border-radius:8px;cursor:pointer}
     .mobile-nav-toggle:focus{outline:3px solid rgba(255,255,255,0.06);outline-offset:3px}
+
+    /* small theme toggle */
+    .theme-toggle{display:inline-flex;align-items:center;gap:8px;margin-left:12px}
+    .theme-btn{background:transparent;border:1px solid rgba(255,255,255,0.03);padding:6px 8px;border-radius:8px;color:var(--muted);cursor:pointer}
+    .theme-btn.on{background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#071226;border:0}
 
     /* HERO */
     .hero{padding:56px 0 40px;position:relative;overflow:visible;min-height:360px;display:flex;align-items:center}
@@ -81,43 +89,31 @@
       letter-spacing:-0.6px;
     }
 
-    /* two-word animated phrases container */
-    .type-wrap {
-      display:inline-flex; align-items:center; gap:12px; vertical-align:middle;
-    }
-    .typed {
-      font-weight:900;font-size:48px;color:transparent;background:linear-gradient(90deg,var(--accent1),var(--accent2));
-      -webkit-background-clip:text;background-clip:text;
-      white-space:nowrap;
-    }
-    .typed-caret{
-      width:3px;height:1.02em;background:linear-gradient(180deg,#fff,#fff);border-radius:2px;
-      animation:blink .9s steps(2,start) infinite; box-shadow:0 0 12px rgba(255,100,100,0.6);
-    }
+    .type-wrap { display:inline-flex; align-items:center; gap:12px; vertical-align:middle; }
+    .typed { font-weight:900;font-size:48px;color:transparent;background:linear-gradient(90deg,var(--accent1),var(--accent2)); -webkit-background-clip:text;background-clip:text; white-space:nowrap; }
+    .typed-caret{ width:3px;height:1.02em;background:linear-gradient(180deg,#fff,#fff);border-radius:2px; animation:blink .9s steps(2,start) infinite; box-shadow:0 0 12px rgba(255,140,120,0.6); }
     @keyframes blink {50%{opacity:0}}
 
     .hero-sub{color:var(--muted);font-size:15px;margin-top:10px;max-width:62ch}
 
-    /* CTA */
     .cta-row{display:flex;gap:12px;align-items:center;margin-top:18px;flex-wrap:wrap}
     .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;text-decoration:none;color:var(--text);background:var(--glass);border:1px solid rgba(255,255,255,0.03);font-weight:800;cursor:pointer;transition:transform .16s ease, box-shadow .16s ease}
     .btn:hover{transform:translateY(-6px);box-shadow:var(--shadow)}
-    .btn.primary{background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#3a0000}
+    .btn.primary{background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#071226}
 
     .badge{display:inline-block;padding:6px 10px;border-radius:999px;background:linear-gradient(90deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));font-weight:800;color:var(--accent1);border:1px solid rgba(255,255,255,0.02)}
 
-    /* HERO RIGHT: profile card with parallax */
     .avatar-card {
       width:420px; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      padding:18px;border-radius:16px;border:1px solid rgba(255,255,255,0.03);display:flex;gap:12px;align-items:center;box-shadow:0 12px 40px rgba(20,6,6,0.45);
+      padding:18px;border-radius:16px;border:1px solid rgba(255,255,255,0.03);display:flex;gap:12px;align-items:center;box-shadow:0 12px 40px rgba(2,8,20,0.45);
       transform-style:preserve-3d; transition:transform .22s cubic-bezier(.2,.9,.2,1);
       will-change:transform;
     }
-    .avatar-card:hover{transform:translateY(-8px) rotateX(2deg) rotateY(-3deg)}
+
     .avatar-wrap{position:relative;width:120px;height:120px;flex:0 0 120px}
-    .avatar{width:120px;height:120px;border-radius:999px;display:block;object-fit:cover;border:4px solid rgba(255,255,255,0.04);box-shadow:0 18px 40px rgba(20,6,6,0.55);transition:transform .28s}
+    .avatar{width:120px;height:120px;border-radius:999px;display:block;object-fit:cover;border:4px solid rgba(255,255,255,0.04);box-shadow:0 18px 40px rgba(2,8,20,0.55);transition:transform .28s}
     .avatar:hover{transform:scale(1.04)}
-    .ring{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:152px;height:152px;border-radius:999px;background:conic-gradient(from 0deg, rgba(255,90,90,0.08), rgba(255,150,150,0.06));filter:blur(10px);opacity:0.95;animation:spin 10s linear infinite}
+    .ring{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:152px;height:152px;border-radius:999px;background:conic-gradient(from 0deg, rgba(255,184,107,0.08), rgba(255,123,123,0.06));filter:blur(10px);opacity:0.95;animation:spin 10s linear infinite}
     @keyframes spin{from{transform:translate(-50%,-50%) rotate(0deg)} to{transform:translate(-50%,-50%) rotate(360deg)}}
     .meta-name{font-weight:800;font-size:18px;margin:0}
     .meta-role{color:var(--muted);margin:6px 0 12px}
@@ -130,39 +126,54 @@
 
     .video-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
     .video-card{background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.02);transition:transform .18s ease, box-shadow .18s ease;will-change:transform}
-    .video-card:hover{transform:translateY(-10px);box-shadow:0 20px 50px rgba(20,6,6,0.55)}
+    .video-card:hover{transform:translateY(-10px);box-shadow:0 20px 50px rgba(2,8,20,0.55)}
 
     .video-frame{width:100%;aspect-ratio:16/9;background:#000;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;position:relative}
     .video-frame iframe, .video-frame video, .video-frame img{width:100%;height:100%;object-fit:cover;display:block}
     .video-thumb{width:100%;height:100%;object-fit:cover;display:block;cursor:pointer;transition:transform .4s ease}
     .video-card:hover .video-thumb{transform:scale(1.03)}
-    .play-badge{position:absolute;z-index:6;background:linear-gradient(90deg,var(--accent1),var(--accent2));width:60px;height:60px;border-radius:999px;display:flex;align-items:center;justify-content:center;color:#3a0000;font-weight:900;box-shadow:0 14px 40px rgba(20,6,6,0.5);cursor:pointer;pointer-events:auto;animation:playPulse 2000ms infinite}
+    .play-badge{position:absolute;z-index:6;background:linear-gradient(90deg,var(--accent1),var(--accent2));width:60px;height:60px;border-radius:999px;display:flex;align-items:center;justify-content:center;color:#071226;font-weight:900;box-shadow:0 14px 40px rgba(2,8,20,0.5);cursor:pointer;pointer-events:auto;animation:playPulse 2000ms infinite}
     @keyframes playPulse{0%{transform:scale(1)}50%{transform:scale(1.06)}100%{transform:scale(1)}}
     .video-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
 
     .controls{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap}
     .toggle{display:inline-flex;align-items:center;gap:8px}
-    .switch{width:46px;height:26px;border-radius:999px;background:#120406;border:1px solid rgba(255,255,255,0.04);position:relative;cursor:pointer}
+    .switch{width:46px;height:26px;border-radius:999px;background:#0b1220;border:1px solid rgba(255,255,255,0.04);position:relative;cursor:pointer}
     .knob{position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;transition:left .18s ease, background .18s ease}
     .switch.on{background:linear-gradient(90deg,var(--accent1),var(--accent2))}
-    .switch.on .knob{left:23px;background:#3a0000}
+    .switch.on .knob{left:23px;background:#071226}
 
-    /* testimonials stacked cards with animation (compacted) */
+    .muted-badge{font-size:12px;color:var(--muted)}
+
+    /* APPS GRID */
+    .apps-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:12px}
+    .app-card{background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.02);display:flex;flex-direction:column;gap:8px}
+    .app-card h4{margin:0}
+    .app-note{font-size:13px;color:var(--muted)}
+
+    /* modal app */
+    .app-modal-backdrop{position:fixed;inset:0;background:rgba(2,8,15,0.6);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:200}
+    .app-modal{width:min(980px,96%);background:linear-gradient(180deg,#061022,#071226);border-radius:12px;padding:18px;border:1px solid rgba(255,255,255,0.04);box-shadow:0 30px 80px rgba(2,8,20,0.7);transform:translateY(20px) scale(.98);transition:all .28s ease;max-height:86vh;overflow:auto}
+    .app-modal.show{transform:none}
+    .app-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}
+
+    .subtitle-overlay{position:absolute;left:0;right:0;bottom:8%;text-align:center;color:white;text-shadow:0 4px 20px rgba(0,0,0,0.7);font-weight:700;padding:6px 12px;border-radius:6px;pointer-events:none}
+
+    .small { font-size:13px; color:var(--muted); }
+
+    /* compacted testimonials */
     .testimonial{display:flex;gap:10px;align-items:flex-start;padding:10px;border-radius:8px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);border:1px solid rgba(255,255,255,0.02);margin-bottom:10px;transform:translateY(8px);opacity:0;transition:all .5s cubic-bezier(.2,.9,.2,1)}
     .testimonial.in-view{transform:none;opacity:1}
 
-    /* compacted text/avatar sizes */
     .t-quote{font-size:13px;color:var(--muted);line-height:1.4}
     .t-avatar{width:44px;height:44px;border-radius:999px;object-fit:cover;border:2px solid rgba(255,255,255,0.03)}
     .t-name{font-weight:800;font-size:13px}
     .t-role{font-size:12px;color:var(--muted)}
 
     .testimonial-wrap { margin-top:12px; display:grid; grid-template-columns: 1fr 260px; gap:12px; align-items:start; }
-    .testimonial-wrap aside > div { padding:12px; border-radius:10px; }
 
-    /* modal contact */
-    .modal-backdrop{position:fixed;inset:0;background:rgba(20,6,6,0.6);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:120}
-    .modal{width:min(640px,94%);background:linear-gradient(180deg,#2a0b0b,#3a0f0f);border-radius:12px;padding:18px;border:1px solid rgba(255,255,255,0.04);box-shadow:0 30px 80px rgba(20,6,6,0.7);transform:translateY(20px) scale(.98);transition:all .28s ease}
+    .modal-backdrop{position:fixed;inset:0;background:rgba(2,8,15,0.6);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:120}
+    .modal{width:min(640px,94%);background:linear-gradient(180deg,#061022,#071226);border-radius:12px;padding:18px;border:1px solid rgba(255,255,255,0.04);box-shadow:0 30px 80px rgba(2,8,20,0.7);transform:translateY(20px) scale(.98);transition:all .28s ease}
     .modal.show{transform:none}
     .modal h4{margin:0 0 8px}
     .form-row{display:flex;gap:8px;flex-wrap:wrap}
@@ -170,10 +181,9 @@
     .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
 
     footer{border-top:1px solid rgba(255,255,255,0.02);padding:20px 0;color:var(--muted)}
-    .back-to-top{position:fixed;right:18px;bottom:18px;background:linear-gradient(90deg,var(--accent1),var(--accent2));width:46px;height:46px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#3a0000;cursor:pointer;box-shadow:0 12px 40px rgba(20,6,6,0.5);z-index:80}
+    .back-to-top{position:fixed;right:18px;bottom:18px;background:linear-gradient(90deg,var(--accent1),var(--accent2));width:46px;height:46px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#071226;cursor:pointer;box-shadow:0 12px 40px rgba(2,8,20,0.5);z-index:80}
     .focus-ring:focus{outline:3px solid rgba(255,255,255,0.06);outline-offset:3px}
 
-    /* Responsive / mobile-friendly adjustments */
     @media (max-width:980px){
       .hero-inner{grid-template-columns:1fr}
       .avatar-card{width:100%}
@@ -198,8 +208,8 @@
       nav{display:none}
       nav.open{
         display:flex; flex-direction:column; gap:8px;
-        position:fixed; right:12px; top:66px; background:linear-gradient(180deg, rgba(20,6,6,0.96), rgba(20,6,6,0.98)); padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.03); z-index:90;
-        box-shadow:0 10px 40px rgba(20,6,6,0.6);
+        position:fixed; right:12px; top:66px; background:linear-gradient(180deg, rgba(2,8,15,0.96), rgba(2,8,15,0.98)); padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.03); z-index:90;
+        box-shadow:0 10px 40px rgba(2,8,20,0.6);
       }
       .header-inner{position:relative}
       .video-card{padding:10px}
@@ -222,56 +232,31 @@
       .t-name{font-size:12px}
     }
 
-    /* hide particle canvas on very small screens */
     @media (max-width:600px){
       #particles{display:none}
       #bg-ribbon{filter:blur(38px)}
     }
 
-    /* APK styles */
-    .apk-grid{
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
-      gap:12px;
-      align-items:start;
-      margin-top:12px;
-    }
-    .apk-card{
-      background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
-      border:1px solid rgba(255,255,255,0.03);
-      padding:10px;
-      border-radius:10px;
-      display:flex;
-      gap:8px;
-      align-items:center;
-      transition:transform .16s ease, box-shadow .16s ease;
-    }
-    .apk-card:hover{transform:translateY(-6px);box-shadow:0 14px 40px rgba(20,6,6,0.45)}
-    .apk-thumb{width:56px;height:56px;border-radius:8px;flex:0 0 56px;object-fit:cover;border:2px solid rgba(255,255,255,0.03)}
-    .apk-meta{flex:1;min-width:0}
-    .apk-name{font-weight:800;font-size:13px;margin:0}
-    .apk-sub{font-size:12px;color:var(--muted);margin-top:4px}
-    .apk-actions{display:flex;flex-direction:column;gap:6px}
-    .btn.small{padding:8px 10px;font-size:13px;border-radius:8px}
-    @media (max-width:420px){
-      .apk-thumb{width:48px;height:48px;flex:0 0 48px}
-      .apk-name{font-size:13px}
-      .apk-sub{font-size:11px}
-    }
+    .audio-toggle { display:inline-flex; align-items:center; gap:8px; font-weight:800; color:var(--muted); }
+    .audio-toggle .small { font-size:13px; color:var(--muted); }
 
   </style>
 </head>
 <body>
   <div id="bg-ribbon" aria-hidden="true"></div>
 
-  <!-- interactive particle canvas -->
   <canvas id="particles" style="position:fixed;inset:0;z-index:1;pointer-events:none"></canvas>
 
   <header>
     <div class="container header-inner">
-      <div class="brand">
-        <h1>Surya Editor</h1>
-        <p>Professional Editing · VFX · Live Preview</p>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="brand">
+          <h1>Surya Editor</h1>
+          <p>Professional Editing · VFX · Live Preview</p>
+        </div>
+        <div class="theme-toggle" aria-hidden="false">
+          <button id="themeBtn" class="theme-btn focus-ring" aria-pressed="false" title="Toggle theme">Theme</button>
+        </div>
       </div>
 
       <!-- mobile nav toggle -->
@@ -280,7 +265,7 @@
       <nav id="mainNav" aria-label="Main">
         <a href="#services" class="focus-ring">Services</a>
         <a href="#portfolio" class="focus-ring">Portfolio</a>
-        <a href="#apks" class="focus-ring">APKs</a>
+        <a href="#apps" class="focus-ring">Apps</a>
         <a href="#contact" class="focus-ring">Contact</a>
       </nav>
     </div>
@@ -304,7 +289,6 @@
             <a class="btn" href="#portfolio">Open Portfolio</a>
             <span class="badge">Live Preview</span>
 
-            <!-- Background audio toggle (on/off) -->
             <div class="audio-toggle" style="margin-left:8px;">
               <div id="audioSwitch" class="switch" role="switch" aria-checked="false" tabindex="0" aria-label="Toggle background music"><div class="knob"></div></div>
               <div class="small" id="audioLabel">Music Off</div>
@@ -338,7 +322,6 @@
       </div>
     </section>
 
-    <!-- portfolio with live videos -->
     <section id="portfolio" class="container" aria-labelledby="portfolio">
       <h3>Portfolio — Live Videos</h3>
       <p class="small" style="margin-top:6px">3 demo videos — click here to see .</p>
@@ -348,7 +331,7 @@
           <div id="masterSwitch" class="switch" role="switch" aria-checked="false" tabindex="0" aria-label="Toggle all videos"><div class="knob"></div></div>
         </div>
         <div class="small" style="color:var(--muted)">Master ON / OFF</div>
-        <div style="margin-left:auto" class="small" title="Tip">Tip: click thumbnail to play</div>
+        <div style="margin-left:auto" class="small" title="Tip">Tip: click thumbnail to play · Shortcuts: Space play/pause, M mute, F fullscreen</div>
       </div>
 
       <div class="video-grid" aria-live="polite">
@@ -364,6 +347,9 @@
             </div>
             <button class="btn" data-play="1">Play</button>
             <button class="btn" data-stop="1">Stop</button>
+            <button class="btn small mute-btn" data-mute="1" title="Mute/unmute">Mute</button>
+            <a class="btn small" data-download="1" style="display:none">Download</a>
+            <div class="small muted-badge" id="dur-1" aria-hidden="true"></div>
           </div>
         </div>
 
@@ -379,6 +365,9 @@
             </div>
             <button class="btn" data-play="2">Play</button>
             <button class="btn" data-stop="2">Stop</button>
+            <button class="btn small mute-btn" data-mute="2" title="Mute/unmute">Mute</button>
+            <a class="btn small" data-download="2" style="display:none">Download</a>
+            <div class="small muted-badge" id="dur-2" aria-hidden="true"></div>
           </div>
         </div>
 
@@ -394,69 +383,57 @@
             </div>
             <button class="btn" data-play="3">Play</button>
             <button class="btn" data-stop="3">Stop</button>
+            <button class="btn small mute-btn" data-mute="3" title="Mute/unmute">Mute</button>
+            <a class="btn small" data-download="3" style="display:none">Download</a>
+            <div class="small muted-badge" id="dur-3" aria-hidden="true"></div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Compact APK Downloads section -->
-    <section id="apks" class="container" aria-labelledby="apks-title">
-      <h3 id="apks-title">APK Downloads — Compact</h3>
-      <p class="small" style="margin-top:6px">Five APKs — click to download. (Place your .apk files inside the apks/ folder or set correct links.)</p>
+    <!-- APPS: five small helper apps -->
+    <section id="apps" class="container" aria-labelledby="appsTitle">
+      <h3 id="appsTitle">Apps — Quick Tools</h3>
+      <p class="small" style="margin-top:6px">Five lightweight tools to help preview, grade and capture frames. These are client-side helpers (no uploads).</p>
 
-      <div class="apk-grid" role="list" aria-label="APK downloads">
-        <div class="apk-card" role="listitem">
-          <img class="apk-thumb" src="apks/icon-app1.png" alt="App 1 icon">
-          <div class="apk-meta">
-            <div class="apk-name">CAPCUT PRO </div>
-            <div class="apk-sub">v1.2</div>
-          </div>
-          <div class="apk-actions">
-            <a class="btn small" href="apks/surya-tools-v1.2.apk" download>Download</a>
+      <div class="apps-grid">
+        <div class="app-card" data-app="color-grader">
+          <h4>Mini Color Grader</h4>
+          <div class="app-note">Adjust brightness / contrast / saturation on a sample video (non-destructive).</div>
+          <div style="margin-top:auto">
+            <button class="btn" data-open-app="color-grader">Open</button>
           </div>
         </div>
 
-        <div class="apk-card" role="listitem">
-          <img class="apk-thumb" src="apks/icon-app2.png" alt="App 2 icon">
-          <div class="apk-meta">
-            <div class="apk-name">BEST VPN </div>
-            <div class="apk-sub">v0.9</div>
-          </div>
-          <div class="apk-actions">
-            <a class="btn small" href="apks/quicktrim-v0.9.apk" download>Download</a>
+        <div class="app-card" data-app="quick-trimmer">
+          <h4>Quick Trimmer</h4>
+          <div class="app-note">Set start/end times and preview a trimmed range locally.</div>
+          <div style="margin-top:auto">
+            <button class="btn" data-open-app="quick-trimmer">Open</button>
           </div>
         </div>
 
-        <div class="apk-card" role="listitem">
-          <img class="apk-thumb" src="apks/icon-app3.png" alt="App 3 icon">
-          <div class="apk-meta">
-            <div class="apk-name">ColorPop</div>
-            <div class="apk-sub">v2.0</div>
-          </div>
-          <div class="apk-actions">
-            <a class="btn small" href="apks/colorpop-v2.0.apk" download>Download</a>
+        <div class="app-card" data-app="subtitle-drawer">
+          <h4>Subtitle Drawer</h4>
+          <div class="app-note">Paste simple cues and preview subtitles synced to a sample video.</div>
+          <div style="margin-top:auto">
+            <button class="btn" data-open-app="subtitle-drawer">Open</button>
           </div>
         </div>
 
-        <div class="apk-card" role="listitem">
-          <img class="apk-thumb" src="apks/icon-app4.png" alt="App 4 icon">
-          <div class="apk-meta">
-            <div class="apk-name">VFX Pack</div>
-            <div class="apk-sub">v1.0</div>
-          </div>
-          <div class="apk-actions">
-            <a class="btn small" href="apks/vfxpack-v1.0.apk" download>Download</a>
+        <div class="app-card" data-app="vfx-presets">
+          <h4>VFX Presets</h4>
+          <div class="app-note">Apply quick LUT-like filters (cinematic, vintage, teal-orange) to preview.</div>
+          <div style="margin-top:auto">
+            <button class="btn" data-open-app="vfx-presets">Open</button>
           </div>
         </div>
 
-        <div class="apk-card" role="listitem">
-          <img class="apk-thumb" src="apks/icon-app5.png" alt="App 5 icon">
-          <div class="apk-meta">
-            <div class="apk-name">SoundTweak</div>
-            <div class="apk-sub">v1.4</div>
-          </div>
-          <div class="apk-actions">
-            <a class="btn small" href="apks/soundtweak-v1.4.apk" download>Download</a>
+        <div class="app-card" data-app="thumbnail-capture">
+          <h4>Thumbnail Capture</h4>
+          <div class="app-note">Capture a frame from a sample video and download as PNG.</div>
+          <div style="margin-top:auto">
+            <button class="btn" data-open-app="thumbnail-capture">Open</button>
           </div>
         </div>
       </div>
@@ -550,15 +527,28 @@
     </div>
   </div>
 
-  <!-- Hidden background audio element (you can set DEFAULT_AUDIO var or pass ?audio=URL) -->
+  <!-- Apps modal (dynamic content inserted by JS) -->
+  <div id="appModalBackdrop" class="app-modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="app-modal" role="document" aria-labelledby="appModalTitle">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <h4 id="appModalTitle">App</h4>
+        <div style="display:flex;gap:8px">
+          <button class="btn" id="appClose">Close</button>
+        </div>
+      </div>
+      <div id="appContent" style="margin-top:12px"></div>
+    </div>
+  </div>
+
+  <div id="particlesPausedBadge" style="position:fixed;left:12px;bottom:12px;background:rgba(0,0,0,0.4);color:var(--muted);padding:8px;border-radius:8px;z-index:90;display:none">Particles paused</div>
+
   <audio id="bgAudio" loop crossorigin="anonymous" style="display:none;"></audio>
 
   <script>
-    /* ---------- CONFIG (same as original) ---------- */
+    /* ---------- Config ---------- */
     const DEFAULT_VIDEOS = ["videos/video1.mp4", "videos/video2.mp4", "videos/video3.mp4"];
     const DEFAULT_AUDIO = "videos/bg-music.mp3";
 
-    /* ---------- utility: extract YouTube ID ---------- */
     function youtubeID(url){
       if(!url) return null;
       try{
@@ -575,11 +565,10 @@
       return null;
     }
 
-    /* ---------- render thumbnail or video ---------- */
+    /* ---------- thumbnail / video rendering ---------- */
     function renderThumbnail(idx, type, src){
       const frame = document.getElementById('frame-'+idx);
       if(!frame) return;
-
       const card = document.querySelector('.video-card[data-index="'+idx+'"]');
       const poster = card ? card.dataset.poster : '';
 
@@ -592,6 +581,8 @@
         badge.addEventListener('click', clickHandler);
         badge.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' ') { e.preventDefault(); clickHandler(); }});
         img.addEventListener('click', clickHandler);
+        // download not available for yt embeds
+        toggleDownloadButton(idx, false);
       } else {
         const imgHtml = poster ? '<img class="video-thumb" src="'+poster+'" alt="Video '+idx+' thumbnail" loading="lazy">' : '<div style="color:var(--muted);padding:8px;text-align:center">MP4 ready — press Play</div>';
         frame.innerHTML = imgHtml + '<div class="video-overlay"><div class="play-badge" role="button" tabindex="0" aria-label="Play video '+idx+'">▶</div></div>';
@@ -599,11 +590,13 @@
         const clickHandler = ()=> loadMP4(idx, src, true);
         badge.addEventListener('click', clickHandler);
         badge.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' ') { e.preventDefault(); clickHandler(); }});
-        frame.addEventListener('click', (ev)=> {
-          if(ev.target === badge) return;
-          loadMP4(idx, src, true);
-        });
+        frame.addEventListener('click', (ev)=> { if(ev.target === badge) return; loadMP4(idx, src, true); });
+        toggleDownloadButton(idx, true, src);
+
+        // Prefetch metadata (duration) and show small duration label
+        prefetchDuration(idx, src);
       }
+
       const sw = document.querySelector('.vid-switch[data-idx="'+idx+'"]');
       if(sw){ sw.classList.remove('on'); sw.setAttribute('aria-checked','false'); }
     }
@@ -620,9 +613,11 @@
     function loadMP4(idx, url, autoplay=false){
       const frame = document.getElementById('frame-'+idx);
       if(!frame) return;
-      frame.innerHTML = '<video playsinline controls ' + (autoplay ? 'autoplay muted' : '') + '><source src="'+url+'" type="video/mp4">Your browser does not support video.</video>';
+      frame.innerHTML = '<video playsinline controls ' + (autoplay ? 'autoplay muted' : '') + ' preload="metadata"><source src="'+url+'" type="video/mp4">Your browser does not support video.</video>';
       const sw = document.querySelector('.vid-switch[data-idx="'+idx+'"]');
       if(sw){ sw.classList.add('on'); sw.setAttribute('aria-checked','true'); }
+      // update mute button state
+      setTimeout(()=> updateMuteButtonForIdx(idx), 60);
     }
     function clearFrame(idx){
       const frame = document.getElementById('frame-'+idx);
@@ -630,14 +625,51 @@
       frame.innerHTML = '<div class="placeholder" id="placeholder-'+idx+'" style="color:var(--muted);padding:8px;text-align:center">Video '+idx+' not configured.</div>';
       const sw = document.querySelector('.vid-switch[data-idx="'+idx+'"]');
       if(sw){ sw.classList.remove('on'); sw.setAttribute('aria-checked','false'); }
+      toggleDownloadButton(idx, false);
+      const dur = document.getElementById('dur-'+idx); if(dur) dur.textContent = '';
     }
 
-    /* ---------- Init on DOM ready (restored behavior) ---------- */
+    /* ---------- small helpers ---------- */
+    function toggleDownloadButton(idx, show, src){
+      const a = document.querySelector('[data-download="'+idx+'"]');
+      if(!a) return;
+      if(show){
+        a.style.display = 'inline-flex';
+        a.href = src;
+        a.setAttribute('download','video-'+idx+'.mp4');
+        a.textContent = 'Download';
+      } else { a.style.display = 'none'; a.removeAttribute('href'); }
+    }
+
+    function prefetchDuration(idx, src){
+      try{
+        const v = document.createElement('video');
+        v.preload = 'metadata';
+        v.src = src;
+        v.addEventListener('loadedmetadata', ()=> {
+          const d = v.duration;
+          const el = document.getElementById('dur-'+idx);
+          if(el && !isNaN(d)) el.textContent = 'Duration: ' + formatTime(d);
+          v.remove();
+        });
+        // small timeout to cleanup
+        setTimeout(()=>{ try{ v.remove(); }catch(e){} }, 60000);
+      }catch(e){}
+    }
+
+    function formatTime(s){
+      if(!isFinite(s)) return '';
+      const m = Math.floor(s/60);
+      const sec = Math.floor(s%60).toString().padStart(2,'0');
+      return `${m}:${sec}`;
+    }
+
+    /* ---------- DOMContentLoaded ---------- */
     let masterOn = false;
     document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('year').textContent = new Date().getFullYear();
 
-      // attach play / stop
+      // play/stop buttons
       document.querySelectorAll('button[data-play]').forEach(btn=>{
         btn.addEventListener('click', ()=> {
           const idx = btn.getAttribute('data-play');
@@ -671,7 +703,7 @@
       m.addEventListener('click', masterToggle);
       m.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') { e.preventDefault(); masterToggle(); }});
 
-      // populate videos from params or DEFAULT_VIDEOS
+      // load videos from params or defaults
       const params = new URLSearchParams(location.search);
       [1,2,3].forEach(i=>{
         const v = params.get('v'+i) || DEFAULT_VIDEOS[i-1] || "";
@@ -685,27 +717,25 @@
         }
       });
 
-      // small keyboard accessibility: space on play-badge works (delegated)
+      // play-badge keyboard handler
       document.body.addEventListener('keydown', (e)=>{
         if(e.key === ' ' && e.target && e.target.classList.contains('play-badge')) { e.preventDefault(); e.target.click(); }
       });
 
-      // reveal on scroll for testimonials and cards
+      // reveal on scroll
       const io = new IntersectionObserver((entries)=>{
         entries.forEach(en=>{
-          if(en.isIntersecting){
-            en.target.classList.add('in-view');
-          }
+          if(en.isIntersecting) en.target.classList.add('in-view');
         });
       }, {threshold:0.12});
-      document.querySelectorAll('.testimonial, .card, .video-card, .avatar-card').forEach(el=> io.observe(el));
+      document.querySelectorAll('.testimonial, .card, .video-card, .avatar-card, .app-card').forEach(el=> io.observe(el));
 
-      // open modal
+      // modal open/close
       document.getElementById('openContact').addEventListener('click', openModal);
       document.getElementById('hireTop').addEventListener('click', openModal);
       document.getElementById('closeModal').addEventListener('click', closeModal);
       document.getElementById('modalBackdrop').addEventListener('click', (e)=>{ if(e.target === document.getElementById('modalBackdrop')) closeModal(); });
-      document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeModal(); });
+      document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') { closeModal(); closeAppModal(); } });
 
       // back to top
       const back = document.getElementById('backTop');
@@ -713,16 +743,16 @@
       back.addEventListener('click', ()=> window.scrollTo({top:0,behavior:'smooth'}));
       back.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' ') { e.preventDefault(); window.scrollTo({top:0,behavior:'smooth'}); }});
 
-      // parallax mouse movement on avatar card (restored immediate)
+      // parallax
       setupParallax();
 
-      // initialize particles canvas (restored immediate)
+      // particles with pause on hide
       initParticles();
 
-      // initialize typed phrases (restored immediate)
+      // typed phrases
       startTypeWriter();
 
-      // mobile nav toggle behavior
+      // mobile nav toggle
       const navToggle = document.getElementById('navToggle');
       const mainNav = document.getElementById('mainNav');
       navToggle.addEventListener('click', ()=>{
@@ -736,13 +766,44 @@
           if(window.innerWidth <= 700){ mainNav.classList.remove('open'); navToggle.setAttribute('aria-expanded','false'); mainNav.setAttribute('aria-hidden','true'); }
         });
       });
-      document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape'){ mainNav.classList.remove('open'); navToggle.setAttribute('aria-expanded','false'); mainNav.setAttribute('aria-hidden','true'); }});
 
-      // Initialize background audio toggle
+      // theme toggle
+      const themeBtn = document.getElementById('themeBtn');
+      try { const t = localStorage.getItem('theme'); if(t === 'light') { document.documentElement.setAttribute('data-theme','light'); themeBtn.classList.add('on'); themeBtn.setAttribute('aria-pressed','true'); } } catch(e){}
+      themeBtn.addEventListener('click', ()=> {
+        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+        if(isLight){ document.documentElement.removeAttribute('data-theme'); themeBtn.classList.remove('on'); themeBtn.setAttribute('aria-pressed','false'); try{ localStorage.setItem('theme','dark'); }catch(e){} }
+        else { document.documentElement.setAttribute('data-theme','light'); themeBtn.classList.add('on'); themeBtn.setAttribute('aria-pressed','true'); try{ localStorage.setItem('theme','light'); }catch(e){} }
+      });
+
+      // Init background audio
       initBackgroundAudio();
+
+      // App opening
+      document.querySelectorAll('[data-open-app]').forEach(b => {
+        b.addEventListener('click', ()=> openApp(b.getAttribute('data-open-app')));
+      });
+      document.getElementById('appClose').addEventListener('click', closeAppModal);
+      document.getElementById('appModalBackdrop').addEventListener('click', (e)=>{ if(e.target === document.getElementById('appModalBackdrop')) closeAppModal(); });
+
+      // mute buttons for MP4s
+      document.querySelectorAll('.mute-btn').forEach(b=>{
+        b.addEventListener('click', ()=>{
+          const idx = b.getAttribute('data-mute');
+          toggleMuteForIdx(idx);
+        });
+      });
+
+      // download links (open in new tab)
+      document.querySelectorAll('[data-download]').forEach(a => {
+        a.addEventListener('click', (e)=> { /* default anchor will download */ });
+      });
+
+      // Keyboard shortcuts
+      document.addEventListener('keydown', globalShortcuts);
     });
 
-    /* ---------- toggle single video ---------- */
+    /* ---------- video toggle ---------- */
     function toggleVideo(idx){
       const sw = document.querySelector('.vid-switch[data-idx="'+idx+'"]');
       const card = document.querySelector('.video-card[data-index="'+idx+'"]');
@@ -789,7 +850,311 @@
       setTimeout(()=>{ bd.style.display = 'none'; }, 220);
     }
 
-    /* ---------- Typewriter (two-word phrases) ---------- */
+    /* ---------- Apps modal & apps implementations ---------- */
+    function openApp(appId){
+      const bd = document.getElementById('appModalBackdrop');
+      const title = document.getElementById('appModalTitle');
+      const content = document.getElementById('appContent');
+      bd.style.display = 'flex';
+      title.textContent = appTitle(appId);
+      content.innerHTML = ''; // will be filled
+      setTimeout(()=>{ bd.setAttribute('aria-hidden','false'); bd.querySelector('.app-modal').classList.add('show'); }, 30);
+
+      // create sample video element (shared)
+      const sampleVideoSrc = (document.querySelector('.video-card[data-index="1"]')?.dataset.src) || DEFAULT_VIDEOS[0];
+      const isYouTube = youtubeID(sampleVideoSrc) ? true : false;
+
+      // For apps that require MP4, prefer MP4 sample
+      const sampleMP4 = DEFAULT_VIDEOS[0];
+
+      if(appId === 'color-grader') renderColorGrader(content, sampleMP4);
+      else if(appId === 'quick-trimmer') renderQuickTrimmer(content, sampleMP4);
+      else if(appId === 'subtitle-drawer') renderSubtitleDrawer(content, sampleMP4);
+      else if(appId === 'vfx-presets') renderVFXPresets(content, sampleMP4);
+      else if(appId === 'thumbnail-capture') renderThumbnailCapture(content, sampleMP4);
+      else content.innerHTML = '<p class="small">Unknown app</p>';
+    }
+
+    function closeAppModal(){
+      const bd = document.getElementById('appModalBackdrop');
+      bd.setAttribute('aria-hidden','true');
+      bd.querySelector('.app-modal').classList.remove('show');
+      setTimeout(()=>{ bd.style.display = 'none'; document.getElementById('appContent').innerHTML = ''; }, 220);
+    }
+
+    function appTitle(id){
+      return {
+        'color-grader':'Mini Color Grader',
+        'quick-trimmer':'Quick Trimmer',
+        'subtitle-drawer':'Subtitle Drawer',
+        'vfx-presets':'VFX Presets',
+        'thumbnail-capture':'Thumbnail Capture'
+      }[id] || 'App';
+    }
+
+    // App: Color Grader (simple CSS filter sliders)
+    function renderColorGrader(container, src){
+      container.innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 300px;gap:12px">
+          <div>
+            <video id="cg-video" src="${src}" controls style="width:100%;border-radius:8px;background:#000" crossorigin="anonymous"></video>
+            <div class="subtitle-overlay" id="cg-badge" style="display:none"></div>
+          </div>
+          <div>
+            <label class="small">Brightness <span id="bval">1</span></label>
+            <input id="cg-bright" type="range" min="0" max="2" step="0.02" value="1">
+            <label class="small">Contrast <span id="cval">1</span></label>
+            <input id="cg-contrast" type="range" min="0" max="2" step="0.02" value="1">
+            <label class="small">Saturation <span id="sval">1</span></label>
+            <input id="cg-sat" type="range" min="0" max="2" step="0.02" value="1">
+            <div style="margin-top:12px" class="app-controls">
+              <button class="btn" id="cg-reset">Reset</button>
+              <button class="btn" id="cg-apply">Apply to preview</button>
+            </div>
+            <p class="small" style="margin-top:10px">Note: This is a client-side preview. To apply permanently, export from your editor with the same grade.</p>
+          </div>
+        </div>
+      `;
+      const video = document.getElementById('cg-video');
+      const br = document.getElementById('cg-bright');
+      const co = document.getElementById('cg-contrast');
+      const sa = document.getElementById('cg-sat');
+      const bval = document.getElementById('bval');
+      const cval = document.getElementById('cval');
+      const sval = document.getElementById('sval');
+
+      function updateFilter(){
+        const f = `brightness(${br.value}) contrast(${co.value}) saturate(${sa.value})`;
+        video.style.filter = f;
+        bval.textContent = Number(br.value).toFixed(2);
+        cval.textContent = Number(co.value).toFixed(2);
+        sval.textContent = Number(sa.value).toFixed(2);
+      }
+      [br,co,sa].forEach(el=> el.addEventListener('input', updateFilter));
+      document.getElementById('cg-reset').addEventListener('click', ()=>{
+        br.value=1; co.value=1; sa.value=1; updateFilter();
+      });
+      document.getElementById('cg-apply').addEventListener('click', ()=> {
+        // just a preview: show tiny confirmation
+        const badge = document.getElementById('cg-badge');
+        badge.textContent = 'Preview applied';
+        badge.style.display = 'block';
+        setTimeout(()=> badge.style.display = 'none', 1200);
+      });
+    }
+
+    // App: Quick Trimmer (play a selected range)
+    function renderQuickTrimmer(container, src){
+      container.innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 320px;gap:12px">
+          <div>
+            <video id="qt-video" src="${src}" controls style="width:100%;border-radius:8px;background:#000" crossorigin="anonymous"></video>
+            <div class="subtitle-overlay" id="qt-badge" style="display:none"></div>
+          </div>
+          <div>
+            <label class="small">Start (s)</label>
+            <input id="qt-start" type="number" min="0" step="0.1" value="0">
+            <label class="small">End (s)</label>
+            <input id="qt-end" type="number" min="0" step="0.1" value="5">
+            <div class="app-controls">
+              <button class="btn" id="qt-playrange">Play Range</button>
+              <button class="btn" id="qt-stoprange">Stop</button>
+            </div>
+            <p class="small" style="margin-top:10px">Export trimmed clip locally requires server-side processing — here you can preview the range before exporting in your NLE.</p>
+          </div>
+        </div>
+      `;
+      const v = document.getElementById('qt-video');
+      const s = document.getElementById('qt-start');
+      const e = document.getElementById('qt-end');
+      let playingRange = false;
+      let stopAt = 0;
+
+      document.getElementById('qt-playrange').addEventListener('click', ()=>{
+        const st = Math.max(0, parseFloat(s.value) || 0);
+        const ed = Math.max(st + 0.1, parseFloat(e.value) || st + 1);
+        v.currentTime = st;
+        stopAt = ed;
+        v.play();
+        playingRange = true;
+      });
+      document.getElementById('qt-stoprange').addEventListener('click', ()=>{
+        playingRange = false;
+        v.pause();
+      });
+      v.addEventListener('timeupdate', ()=> {
+        if(playingRange && v.currentTime >= stopAt - 0.05){ v.pause(); playingRange = false; }
+      });
+      v.addEventListener('loadedmetadata', ()=> { e.max = v.duration; });
+    }
+
+    // App: Subtitle Drawer (simple cue format: mm:ss text)
+    function renderSubtitleDrawer(container, src){
+      container.innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 360px;gap:12px">
+          <div style="position:relative">
+            <video id="sub-video" src="${src}" controls style="width:100%;border-radius:8px;background:#000" crossorigin="anonymous"></video>
+            <div class="subtitle-overlay" id="sub-overlay" style="display:none"></div>
+          </div>
+          <div>
+            <label class="small">Simple cues (one per line)</label>
+            <textarea id="sub-text" rows="10" class="input" placeholder="00:00 Your text here\n00:05 Another caption"></textarea>
+            <div class="app-controls">
+              <button class="btn" id="sub-load">Load</button>
+              <button class="btn" id="sub-clear">Clear</button>
+            </div>
+            <p class="small" style="margin-top:8px">Format: mm:ss text. This is for preview only — for production export proper SRT/ASS files.</p>
+          </div>
+        </div>
+      `;
+      const v = document.getElementById('sub-video');
+      const overlay = document.getElementById('sub-overlay');
+      let cues = [];
+
+      function parseCues(text){
+        const lines = text.split('\n').map(l=>l.trim()).filter(Boolean);
+        const out = [];
+        for(const ln of lines){
+          const m = ln.match(/^(\d+):(\d{2})\s+(.+)$/);
+          if(m){
+            const mm = parseInt(m[1],10), ss = parseInt(m[2],10);
+            const t = mm*60 + ss;
+            out.push({t, text: m[3]});
+          }
+        }
+        return out;
+      }
+
+      document.getElementById('sub-load').addEventListener('click', ()=>{
+        const raw = document.getElementById('sub-text').value;
+        cues = parseCues(raw);
+        overlay.style.display = 'block';
+      });
+      document.getElementById('sub-clear').addEventListener('click', ()=> {
+        document.getElementById('sub-text').value = '';
+        cues = [];
+        overlay.style.display = 'none';
+      });
+      v.addEventListener('timeupdate', ()=> {
+        const t = Math.floor(v.currentTime);
+        const cue = cues.find(c=> c.t === t);
+        if(cue) { overlay.textContent = cue.text; overlay.style.opacity = '1'; setTimeout(()=> overlay.style.opacity = '0.95', 50); }
+      });
+    }
+
+    // App: VFX Presets (CSS filters)
+    function renderVFXPresets(container, src){
+      container.innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 280px;gap:12px">
+          <div>
+            <video id="vfx-video" src="${src}" controls style="width:100%;border-radius:8px;background:#000" crossorigin="anonymous"></video>
+          </div>
+          <div>
+            <div class="app-controls">
+              <button class="btn" data-preset="none">None</button>
+              <button class="btn" data-preset="cinematic">Cinematic</button>
+              <button class="btn" data-preset="vintage">Vintage</button>
+              <button class="btn" data-preset="teal-orange">Teal-Orange</button>
+            </div>
+            <p class="small" style="margin-top:10px">Try presets and then export grade in your NLE for best results.</p>
+          </div>
+        </div>
+      `;
+      const v = document.getElementById('vfx-video');
+      container.querySelectorAll('[data-preset]').forEach(b=>{
+        b.addEventListener('click', ()=>{
+          const p = b.getAttribute('data-preset');
+          if(p === 'none') v.style.filter = '';
+          else if(p === 'cinematic') v.style.filter = 'contrast(1.08) saturate(1.08) brightness(0.98) sepia(0.04)';
+          else if(p === 'vintage') v.style.filter = 'saturate(0.8) sepia(0.18) contrast(0.95) brightness(1)';
+          else if(p === 'teal-orange') v.style.filter = 'contrast(1.05) saturate(1.15) brightness(1.02)';
+        });
+      });
+    }
+
+    // App: Thumbnail Capture (capture current frame to PNG)
+    function renderThumbnailCapture(container, src){
+      container.innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 280px;gap:12px">
+          <div>
+            <video id="cap-video" src="${src}" controls style="width:100%;border-radius:8px;background:#000" crossorigin="anonymous"></video>
+          </div>
+          <div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <button class="btn" id="cap-capture">Capture PNG</button>
+              <a class="btn" id="cap-download" style="display:none">Download</a>
+              <p class="small">Seek to desired frame then click Capture. The frame will be rendered into a PNG you can download.</p>
+            </div>
+          </div>
+        </div>
+      `;
+      const v = document.getElementById('cap-video');
+      const cap = document.getElementById('cap-capture');
+      const dl = document.getElementById('cap-download');
+      cap.addEventListener('click', ()=>{
+        try{
+          const c = document.createElement('canvas');
+          c.width = v.videoWidth || 1280;
+          c.height = v.videoHeight || 720;
+          const ctx = c.getContext('2d');
+          ctx.drawImage(v, 0, 0, c.width, c.height);
+          const data = c.toDataURL('image/png');
+          dl.href = data;
+          dl.download = 'thumb-'+Date.now()+'.png';
+          dl.style.display = 'inline-flex';
+          dl.textContent = 'Download PNG';
+          // auto-click to download if user prefers
+          // dl.click();
+        }catch(e){
+          alert('Could not capture frame (video may be cross-origin). Try with a local MP4.');
+        }
+      });
+    }
+
+    /* ---------- Mute / update helpers ---------- */
+    function updateMuteButtonForIdx(idx){
+      const frame = document.getElementById('frame-'+idx);
+      if(!frame) return;
+      const video = frame.querySelector('video');
+      const btn = document.querySelector('.mute-btn[data-mute="'+idx+'"]');
+      if(!btn) return;
+      if(video){
+        btn.style.display = 'inline-flex';
+        btn.textContent = video.muted ? 'Unmute' : 'Mute';
+      } else {
+        btn.style.display = 'none';
+      }
+    }
+
+    function toggleMuteForIdx(idx){
+      const frame = document.getElementById('frame-'+idx);
+      if(!frame) return;
+      const video = frame.querySelector('video');
+      if(!video){ alert('Mute: not supported for embedded videos'); return; }
+      video.muted = !video.muted;
+      updateMuteButtonForIdx(idx);
+    }
+
+    /* ---------- global keyboard shortcuts ---------- */
+    function globalShortcuts(e){
+      // avoid interfering when typing in inputs
+      const tag = document.activeElement && document.activeElement.tagName;
+      if(tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if(e.key === ' '){
+        e.preventDefault();
+        // toggle play on first visible HTMLVideoElement
+        const v = document.querySelector('video');
+        if(v){ if(v.paused) v.play(); else v.pause(); }
+      } else if(e.key.toLowerCase() === 'm'){
+        const v = document.querySelector('video');
+        if(v){ v.muted = !v.muted; }
+      } else if(e.key.toLowerCase() === 'f'){
+        const v = document.querySelector('video');
+        if(v && v.requestFullscreen){ v.requestFullscreen(); }
+      }
+    }
+
+    /* ---------- Typewriter ---------- */
     const TYPE_PHRASES = [
       "Clean Cuts",
       "Live Preview",
@@ -822,17 +1187,12 @@
       tick();
     }
 
-    /* ---------- Parallax for avatar card ---------- */
+    /* ---------- Parallax ---------- */
     function setupParallax(){
       const card = document.getElementById('parallax-card');
       if(!card) return;
-
       const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
-      if(isTouch) {
-        card.style.transform = 'none';
-        return;
-      }
-
+      if(isTouch) { card.style.transform = 'none'; return; }
       let rect = null;
       window.addEventListener('mousemove', (e)=>{
         rect = rect || card.getBoundingClientRect();
@@ -841,26 +1201,17 @@
         const dx = (e.clientX - cx)/rect.width;
         const dy = (e.clientY - cy)/rect.height;
         const w = window.innerWidth;
-        const rx = w < 800 ? dx*5 : dx*8;
-        const ry = w < 800 ? dy*4 : dy*6;
         card.style.transform = `perspective(900px) rotateX(${(-dy*4).toFixed(2)}deg) rotateY(${(dx*6).toFixed(2)}deg) translateY(-4px)`;
       });
       window.addEventListener('mouseleave', ()=> { card.style.transform='none'; });
     }
 
-    /* ---------- Canvas Particles (interactive) ---------- */
+    /* ---------- Canvas Particles (with pause on hidden tab) ---------- */
     function initParticles(){
       const canvas = document.getElementById('particles');
       if(!canvas) return;
       let w=innerWidth, h=innerHeight, dpr = Math.max(1, devicePixelRatio || 1);
-
-      // For mobile / small screens, reduce or hide
-      if (w < 600) {
-        canvas.style.display = 'none';
-        return;
-      } else {
-        canvas.style.display = 'block';
-      }
+      if (w < 600) { canvas.style.display = 'none'; return; } else { canvas.style.display = 'block'; }
 
       const ctx = canvas.getContext('2d');
       canvas.width = w * dpr; canvas.height = h * dpr; canvas.style.width = w+'px'; canvas.style.height = h+'px'; ctx.scale(dpr,dpr);
@@ -874,8 +1225,7 @@
           y: Math.random()*h,
           vx: (Math.random()-0.5)*0.3,
           vy: (Math.random()-0.5)*0.3,
-          r: 0.8 + Math.random()*2.6,
-          hue: 10 + Math.random()*30
+          r: 0.8 + Math.random()*2.6
         });
       }
 
@@ -891,12 +1241,12 @@
       window.addEventListener('touchmove', (e)=>{ if(e.touches && e.touches[0]){ mouse.x = e.touches[0].clientX; mouse.y = e.touches[0].clientY; mouse.moved=true; } }, {passive:true});
 
       let last = performance.now();
+      let running = true;
       function frame(now){
+        if(!running){ requestAnimationFrame(frame); return; }
         const dt = Math.min(50, now - last); last = now;
         ctx.clearRect(0,0,w,h);
-
-        // subtle background gradient overlay
-        ctx.fillStyle = 'rgba(20,6,6,0.12)';
+        ctx.fillStyle = 'rgba(2,8,20,0.12)';
         ctx.fillRect(0,0,w,h);
 
         particles.forEach(p=>{
@@ -916,9 +1266,9 @@
 
           ctx.beginPath();
           const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r*6);
-          g.addColorStop(0, 'rgba(255,110,110,0.18)');
-          g.addColorStop(0.2, 'rgba(255,150,150,0.12)');
-          g.addColorStop(1, 'rgba(20,6,6,0)');
+          g.addColorStop(0, 'rgba(255,140,120,0.18)');
+          g.addColorStop(0.2, 'rgba(255,184,107,0.12)');
+          g.addColorStop(1, 'rgba(2,8,20,0)');
           ctx.fillStyle = g;
           ctx.arc(p.x, p.y, p.r*6, 0, Math.PI*2);
           ctx.fill();
@@ -931,85 +1281,76 @@
 
         requestAnimationFrame(frame);
       }
+
+      // Pause when page hidden
+      document.addEventListener('visibilitychange', ()=>{
+        const badge = document.getElementById('particlesPausedBadge');
+        if(document.hidden){ running = false; badge.style.display = 'block'; }
+        else { running = true; badge.style.display = 'none'; }
+      });
       requestAnimationFrame(frame);
     }
 
- <script>
-/* ---------- Background audio support (toggle) ---------- */
-function initBackgroundAudio(){
-  const audioEl = document.getElementById('bgAudio');
-  const audioSwitch = document.getElementById('audioSwitch');
-  const audioLabel = document.getElementById('audioLabel');
+    /* ---------- Background audio support ---------- */
+    function initBackgroundAudio(){
+      const audioEl = document.getElementById('bgAudio');
+      const audioSwitch = document.getElementById('audioSwitch');
+      const audioLabel = document.getElementById('audioLabel');
 
-  const params = new URLSearchParams(location.search);
-  const audioParam = params.get('audio');
-  const src = audioParam || DEFAULT_AUDIO || "";
+      const params = new URLSearchParams(location.search);
+      const audioParam = params.get('audio');
+      const src = audioParam || DEFAULT_AUDIO || "";
 
-  if(!src){
-    audioSwitch.setAttribute('aria-disabled','true');
-    audioSwitch.style.opacity = '0.5';
-    audioSwitch.style.cursor = 'not-allowed';
-    audioLabel.textContent = 'Music not set';
-    return;
-  }
+      if(!src){
+        audioSwitch.setAttribute('aria-disabled','true');
+        audioSwitch.style.opacity = '0.5';
+        audioSwitch.style.cursor = 'not-allowed';
+        audioLabel.textContent = 'Music (not set)';
+        return;
+      }
 
-  audioEl.src = src;
-  audioEl.loop = true;
-  audioEl.preload = 'auto';
+      audioEl.src = src;
+      audioEl.preload = 'auto';
+      audioEl.loop = true;
 
-  let isOn = false;
-  try{
-    isOn = localStorage.getItem('bgAudioOn') === 'true';
-  }catch(e){}
+      let wasOn = false;
+      try { wasOn = localStorage.getItem('bgAudioOn') === 'true'; } catch(e){ wasOn = false; }
 
-  function updateUI(on){
-    if(on){
-      audioSwitch.classList.add('on');
-      audioSwitch.setAttribute('aria-checked','true');
-      audioLabel.textContent = 'Music On';
-    }else{
-      audioSwitch.classList.remove('on');
-      audioSwitch.setAttribute('aria-checked','false');
-      audioLabel.textContent = 'Music Off';
+      function updateUI(on){
+        if(on){
+          audioSwitch.classList.add('on');
+          audioSwitch.setAttribute('aria-checked','true');
+          audioLabel.textContent = 'Music On';
+        } else {
+          audioSwitch.classList.remove('on');
+          audioSwitch.setAttribute('aria-checked','false');
+          audioLabel.textContent = 'Music Off';
+        }
+      }
+
+      async function playAudio(){
+        try {
+          await audioEl.play();
+          updateUI(true);
+          try { localStorage.setItem('bgAudioOn','true'); } catch(e){}
+        } catch(e){
+          updateUI(false);
+        }
+      }
+      function pauseAudio(){
+        try { audioEl.pause(); } catch(e){}
+        updateUI(false);
+        try { localStorage.setItem('bgAudioOn','false'); } catch(e){}
+      }
+
+      audioSwitch.addEventListener('click', ()=>{
+        const isOn = audioSwitch.classList.contains('on');
+        if(isOn) pauseAudio(); else playAudio();
+      });
+      audioSwitch.addEventListener('keydown', (e)=>{ if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); audioSwitch.click(); }});
+
+      if(wasOn) playAudio();
     }
-  }
-
-  async function playAudio(){
-    try{
-      await audioEl.play();
-      isOn = true;
-      localStorage.setItem('bgAudioOn','true');
-      updateUI(true);
-    }catch(err){
-      console.warn('Autoplay blocked:', err);
-    }
-  }
-
-  function stopAudio(){
-    audioEl.pause();
-    audioEl.currentTime = 0;
-    isOn = false;
-    localStorage.setItem('bgAudioOn','false');
-    updateUI(false);
-  }
-
-  audioSwitch.addEventListener('click', ()=>{
-    if(isOn) stopAudio();
-    else playAudio();
-  });
-
-  audioSwitch.addEventListener('keydown', (e)=>{
-    if(e.key === 'Enter' || e.key === ' '){
-      e.preventDefault();
-      if(isOn) stopAudio();
-      else playAudio();
-    }
-  });
-
-  updateUI(isOn);
-  if(isOn) playAudio();
-}
-</script>
 
   </script>
 </body>
