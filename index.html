@@ -236,6 +236,38 @@
     /* small audio toggle label spacing */
     .audio-toggle { display:inline-flex; align-items:center; gap:8px; font-weight:800; color:var(--muted); }
     .audio-toggle .small { font-size:13px; color:var(--muted); }
+
+    /* ---------- APK section (compact) ---------- */
+    .apk-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+      gap:12px;
+      align-items:start;
+      margin-top:12px;
+    }
+    .apk-card{
+      background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
+      border:1px solid rgba(255,255,255,0.03);
+      padding:10px;
+      border-radius:10px;
+      display:flex;
+      gap:8px;
+      align-items:center;
+      transition:transform .16s ease, box-shadow .16s ease;
+    }
+    .apk-card:hover{transform:translateY(-6px);box-shadow:0 14px 40px rgba(2,8,20,0.45)}
+    .apk-thumb{width:56px;height:56px;border-radius:8px;flex:0 0 56px;object-fit:cover;border:2px solid rgba(255,255,255,0.03)}
+    .apk-meta{flex:1;min-width:0}
+    .apk-name{font-weight:800;font-size:13px;margin:0}
+    .apk-sub{font-size:12px;color:var(--muted);margin-top:4px}
+    .apk-actions{display:flex;flex-direction:column;gap:6px}
+    .btn.small{padding:8px 10px;font-size:13px;border-radius:8px}
+    @media (max-width:420px){
+      .apk-thumb{width:48px;height:48px;flex:0 0 48px}
+      .apk-name{font-size:13px}
+      .apk-sub{font-size:11px}
+    }
+
   </style>
 </head>
 <body>
@@ -257,6 +289,7 @@
       <nav id="mainNav" aria-label="Main">
         <a href="#services" class="focus-ring">Services</a>
         <a href="#portfolio" class="focus-ring">Portfolio</a>
+        <a href="#apks" class="focus-ring">APKs</a>
         <a href="#contact" class="focus-ring">Contact</a>
       </nav>
     </div>
@@ -371,6 +404,69 @@
             </div>
             <button class="btn" data-play="3">Play</button>
             <button class="btn" data-stop="3">Stop</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- NEW: Compact APK Downloads section (MB removed as requested) -->
+    <section id="apks" class="container" aria-labelledby="apks-title">
+      <h3 id="apks-title">APK Downloads — Compact</h3>
+      <p class="small" style="margin-top:6px">Five APKs — click to download. (Place your .apk files inside the apks/ folder or set correct links.)</p>
+
+      <div class="apk-grid" role="list" aria-label="APK downloads">
+        <div class="apk-card" role="listitem">
+          <img class="apk-thumb" src="apks/icon-app1.png" alt="App 1 icon">
+          <div class="apk-meta">
+            <div class="apk-name">Surya Tools</div>
+            <div class="apk-sub">v1.2</div>
+          </div>
+          <div class="apk-actions">
+            <a class="btn small" href="apks/surya-tools-v1.2.apk" download>Download</a>
+          </div>
+        </div>
+
+        <div class="apk-card" role="listitem">
+          <img class="apk-thumb" src="apks/icon-app2.png" alt="App 2 icon">
+          <div class="apk-meta">
+            <div class="apk-name">QuickTrim</div>
+            <div class="apk-sub">v0.9</div>
+          </div>
+          <div class="apk-actions">
+            <a class="btn small" href="apks/quicktrim-v0.9.apk" download>Download</a>
+          </div>
+        </div>
+
+        <div class="apk-card" role="listitem">
+          <img class="apk-thumb" src="apks/icon-app3.png" alt="App 3 icon">
+          <div class="apk-meta">
+            <div class="apk-name">ColorPop</div>
+            <div class="apk-sub">v2.0</div>
+          </div>
+          <div class="apk-actions">
+            <a class="btn small" href="apks/colorpop-v2.0.apk" download>Download</a>
+          </div>
+        </div>
+
+        <div class="apk-card" role="listitem">
+          <img class="apk-thumb" src="apks/icon-app4.png" alt="App 4 icon">
+          <div class="apk-meta">
+            <div class="apk-name">VFX Pack</div>
+            <div class="apk-sub">v1.0</div>
+          </div>
+          <div class="apk-actions">
+            <a class="btn small" href="apks/vfxpack-v1.0.apk" download>Download</a>
+          </div>
+        </div>
+
+        <div class="apk-card" role="listitem">
+          <img class="apk-thumb" src="apks/icon-app5.png" alt="App 5 icon">
+          <div class="apk-meta">
+            <div class="apk-name">SoundTweak</div>
+            <div class="apk-sub">v1.4</div>
+          </div>
+          <div class="apk-actions">
+            <a class="btn small" href="apks/soundtweak-v1.4.apk" download>Download</a>
           </div>
         </div>
       </div>
